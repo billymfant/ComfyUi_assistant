@@ -1,0 +1,22 @@
+# binaries / large
+cloudflared.exe
+*.exe
+
+# machine-specific dumps (regenerable)
+object_info.json
+up.json
+mp.json
+nul
+
+# logs
+*.log
+
+# python
+__pycache__/
+*.pyc
+
+# scratch outputs
+/outputs/
+*.png
+*.jpg
+*.jpeg

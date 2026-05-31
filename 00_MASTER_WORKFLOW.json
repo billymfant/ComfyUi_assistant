@@ -1,0 +1,4443 @@
+{
+  "id": "master",
+  "revision": 0,
+  "last_node_id": 100000,
+  "last_link_id": 90004,
+  "nodes": [
+    {
+      "id": 1001,
+      "type": "UNETLoader",
+      "pos": [
+        -1180,
+        -380
+      ],
+      "size": [
+        300,
+        82
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            1020
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "flux-2-klein-4b-fp8.safetensors",
+        "default"
+      ],
+      "title": "Diffusion Model (4B=fast / 9B=quality)"
+    },
+    {
+      "id": 1002,
+      "type": "CLIPLoader",
+      "pos": [
+        -1180,
+        -240
+      ],
+      "size": [
+        300,
+        106
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            1021
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "qwen_3_4b.safetensors",
+        "flux2",
+        "default"
+      ],
+      "title": "Text Encoder (Qwen3)"
+    },
+    {
+      "id": 1003,
+      "type": "VAELoader",
+      "pos": [
+        -1180,
+        -70
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            1003,
+            1007,
+            1011,
+            1030
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "flux2-vae.safetensors"
+      ],
+      "title": "VAE"
+    },
+    {
+      "id": 1004,
+      "type": "CLIPTextEncode",
+      "pos": [
+        -820,
+        -380
+      ],
+      "size": [
+        380,
+        200
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 1021
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            1022
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "a cinematic photo of a red apple on a rustic wooden table, soft window light, shallow depth of field, ultra-detailed, 35mm"
+      ],
+      "title": "Positive Prompt",
+      "color": "#232",
+      "bgcolor": "#232"
+    },
+    {
+      "id": 1005,
+      "type": "FluxGuidance",
+      "pos": [
+        -820,
+        -140
+      ],
+      "size": [
+        380,
+        58
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 1022
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            1013
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FluxGuidance"
+      },
+      "widgets_values": [
+        4
+      ],
+      "title": "Guidance (3-5)"
+    },
+    {
+      "id": 1030,
+      "type": "LoadImage",
+      "pos": [
+        -820,
+        120
+      ],
+      "size": [
+        300,
+        314
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1001
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "Cat.jpeg",
+        "image"
+      ],
+      "title": "Ref 1 image",
+      "color": "#322",
+      "bgcolor": "#322"
+    },
+    {
+      "id": 1031,
+      "type": "ImageScaleToTotalPixels",
+      "pos": [
+        -490,
+        120
+      ],
+      "size": [
+        280,
+        106
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 1001
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1002
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageScaleToTotalPixels"
+      },
+      "widgets_values": [
+        "lanczos",
+        1.0,
+        16
+      ]
+    },
+    {
+      "id": 1032,
+      "type": "VAEEncode",
+      "pos": [
+        -490,
+        270
+      ],
+      "size": [
+        210,
+        46
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "pixels",
+          "type": "IMAGE",
+          "link": 1002
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 1003
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            1004
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEEncode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 1033,
+      "type": "ReferenceLatent",
+      "pos": [
+        -490,
+        370
+      ],
+      "size": [
+        210,
+        66
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 1013
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "link": 1004
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            1014
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ReferenceLatent"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 1040,
+      "type": "LoadImage",
+      "pos": [
+        -820,
+        560
+      ],
+      "size": [
+        300,
+        314
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1005
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "BEST_MAN.jpg",
+        "image"
+      ],
+      "title": "Ref 2 image",
+      "color": "#322",
+      "bgcolor": "#322"
+    },
+    {
+      "id": 1041,
+      "type": "ImageScaleToTotalPixels",
+      "pos": [
+        -490,
+        560
+      ],
+      "size": [
+        280,
+        106
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 1005
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1006
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageScaleToTotalPixels"
+      },
+      "widgets_values": [
+        "lanczos",
+        1.0,
+        16
+      ]
+    },
+    {
+      "id": 1042,
+      "type": "VAEEncode",
+      "pos": [
+        -490,
+        710
+      ],
+      "size": [
+        210,
+        46
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "pixels",
+          "type": "IMAGE",
+          "link": 1006
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 1007
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            1008
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEEncode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 1043,
+      "type": "ReferenceLatent",
+      "pos": [
+        -490,
+        810
+      ],
+      "size": [
+        210,
+        66
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 1014
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "link": 1008
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            1015
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ReferenceLatent"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 1050,
+      "type": "LoadImage",
+      "pos": [
+        -820,
+        1000
+      ],
+      "size": [
+        300,
+        314
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1009
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "Architecture.png",
+        "image"
+      ],
+      "title": "Ref 3 image",
+      "color": "#322",
+      "bgcolor": "#322"
+    },
+    {
+      "id": 1051,
+      "type": "ImageScaleToTotalPixels",
+      "pos": [
+        -490,
+        1000
+      ],
+      "size": [
+        280,
+        106
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 1009
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1010
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageScaleToTotalPixels"
+      },
+      "widgets_values": [
+        "lanczos",
+        1.0,
+        16
+      ]
+    },
+    {
+      "id": 1052,
+      "type": "VAEEncode",
+      "pos": [
+        -490,
+        1150
+      ],
+      "size": [
+        210,
+        46
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "pixels",
+          "type": "IMAGE",
+          "link": 1010
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 1011
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            1012
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEEncode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 1053,
+      "type": "ReferenceLatent",
+      "pos": [
+        -490,
+        1250
+      ],
+      "size": [
+        210,
+        66
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 1015
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "link": 1012
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            1023
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ReferenceLatent"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 1006,
+      "type": "EmptyFlux2LatentImage",
+      "pos": [
+        20,
+        -380
+      ],
+      "size": [
+        280,
+        106
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            1024
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyFlux2LatentImage"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1
+      ],
+      "title": "Canvas size"
+    },
+    {
+      "id": 1010,
+      "type": "RandomNoise",
+      "pos": [
+        20,
+        -240
+      ],
+      "size": [
+        280,
+        82
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "NOISE",
+          "type": "NOISE",
+          "links": [
+            1025
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "RandomNoise"
+      },
+      "widgets_values": [
+        12345,
+        "randomize"
+      ],
+      "title": "Seed"
+    },
+    {
+      "id": 1008,
+      "type": "KSamplerSelect",
+      "pos": [
+        20,
+        -120
+      ],
+      "size": [
+        280,
+        58
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SAMPLER",
+          "type": "SAMPLER",
+          "links": [
+            1027
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSamplerSelect"
+      },
+      "widgets_values": [
+        "euler"
+      ]
+    },
+    {
+      "id": 1009,
+      "type": "Flux2Scheduler",
+      "pos": [
+        20,
+        -30
+      ],
+      "size": [
+        280,
+        82
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": [
+            1028
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Flux2Scheduler"
+      },
+      "widgets_values": [
+        20,
+        1024,
+        1024
+      ],
+      "title": "Scheduler (steps)"
+    },
+    {
+      "id": 1007,
+      "type": "BasicGuider",
+      "pos": [
+        20,
+        110
+      ],
+      "size": [
+        280,
+        46
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 1020
+        },
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 1023
+        }
+      ],
+      "outputs": [
+        {
+          "name": "GUIDER",
+          "type": "GUIDER",
+          "links": [
+            1026
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "BasicGuider"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 1011,
+      "type": "SamplerCustomAdvanced",
+      "pos": [
+        360,
+        -380
+      ],
+      "size": [
+        300,
+        150
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "noise",
+          "type": "NOISE",
+          "link": 1025
+        },
+        {
+          "name": "guider",
+          "type": "GUIDER",
+          "link": 1026
+        },
+        {
+          "name": "sampler",
+          "type": "SAMPLER",
+          "link": 1027
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 1028
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 1024
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "LATENT",
+          "links": [
+            1029
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "denoised_output",
+          "type": "LATENT",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SamplerCustomAdvanced"
+      },
+      "widgets_values": [],
+      "title": "Sampler"
+    },
+    {
+      "id": 1012,
+      "type": "VAEDecode",
+      "pos": [
+        360,
+        -180
+      ],
+      "size": [
+        210,
+        46
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 1029
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 1030
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1017,
+            1031
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 1013,
+      "type": "SaveImage",
+      "pos": [
+        700,
+        -380
+      ],
+      "size": [
+        480,
+        500
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 1031
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "FLUX2"
+      ],
+      "title": "Output (base)"
+    },
+    {
+      "id": 1060,
+      "type": "UpscaleModelLoader",
+      "pos": [
+        700,
+        180
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "UPSCALE_MODEL",
+          "type": "UPSCALE_MODEL",
+          "links": [
+            1016
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UpscaleModelLoader"
+      },
+      "widgets_values": [
+        "4x-UltraSharp.pth"
+      ],
+      "title": "Upscale model"
+    },
+    {
+      "id": 1061,
+      "type": "ImageUpscaleWithModel",
+      "pos": [
+        700,
+        290
+      ],
+      "size": [
+        300,
+        46
+      ],
+      "flags": {},
+      "order": 26,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "upscale_model",
+          "type": "UPSCALE_MODEL",
+          "link": 1016
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 1017
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1018
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageUpscaleWithModel"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 1062,
+      "type": "ImageScaleToMaxDimension",
+      "pos": [
+        700,
+        380
+      ],
+      "size": [
+        300,
+        82
+      ],
+      "flags": {},
+      "order": 27,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 1018
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1019
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageScaleToMaxDimension"
+      },
+      "widgets_values": [
+        "lanczos",
+        3840
+      ],
+      "title": "Cap longest side -> 4K (3840)"
+    },
+    {
+      "id": 1063,
+      "type": "SaveImage",
+      "pos": [
+        700,
+        500
+      ],
+      "size": [
+        480,
+        400
+      ],
+      "flags": {},
+      "order": 28,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 1019
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "FLUX2_upscaled"
+      ],
+      "title": "Upscaled output"
+    },
+    {
+      "id": 1099,
+      "type": "Note",
+      "pos": [
+        -1180,
+        120
+      ],
+      "size": [
+        300,
+        360
+      ],
+      "flags": {},
+      "order": 29,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "Note"
+      },
+      "widgets_values": [
+        "HOW TO USE  (Flux 2 Klein - 100% local & free)\n\nMODE 1 - TEXT TO IMAGE:\n  Leave all 3 Reference groups bypassed (they are red/disabled by default).\n  Type your prompt, hit Run.\n\nMODE 2 - IMAGE TO IMAGE:\n  Enable Reference 1 (select its 4 nodes, press Ctrl+B to un-bypass).\n  Load your image in 'Ref 1 image'. Prompt = what you want changed.\n\nMODE 3 - REFERENCE -> IMAGE:\n  Enable Reference 1, 2 (and 3) the same way, load a different image in each.\n  The model blends/uses all of them. Up to 3 wired here (Flux 2 supports more).\n\nUPSCALE TO 4K (group 5, optional):\n  Select the 4 green nodes, press Ctrl+B to enable. 4x model then caps the\n  longest side at 3840 = up to 4K, saved as FLUX2_upscaled. Off by default.\n\nTIPS:\n  - Guidance 3-5. Steps 20 (try 28-32 for more detail).\n  - For MAX quality switch Diffusion Model to flux-2-klein-base-9b-fp8\n    AND Text Encoder to qwen_3_8b_fp8mixed (slower, heavier).\n  - Change 'Canvas size' AND the width/height in 'Scheduler' to match (keep them equal).\n  - Seed widget: set to 'fixed' to reproduce, 'randomize' to explore."
+      ],
+      "color": "#432",
+      "bgcolor": "#432"
+    },
+    {
+      "id": 2001,
+      "type": "UNETLoader",
+      "pos": [
+        0,
+        1580
+      ],
+      "size": [
+        330,
+        82
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            2001
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "z_image_turbo_bf16.safetensors",
+        "default"
+      ],
+      "title": "Z-Image model"
+    },
+    {
+      "id": 2002,
+      "type": "ModelSamplingAuraFlow",
+      "pos": [
+        0,
+        1700
+      ],
+      "size": [
+        330,
+        58
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 2001
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            2002
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ModelSamplingAuraFlow"
+      },
+      "widgets_values": [
+        3
+      ],
+      "title": "ModelSampling (shift 3)"
+    },
+    {
+      "id": 2003,
+      "type": "CLIPLoader",
+      "pos": [
+        0,
+        1810
+      ],
+      "size": [
+        330,
+        106
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            2003,
+            2004
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "qwen_3_4b.safetensors",
+        "lumina2",
+        "default"
+      ],
+      "title": "Text encoder (lumina2)"
+    },
+    {
+      "id": 2004,
+      "type": "VAELoader",
+      "pos": [
+        0,
+        1950
+      ],
+      "size": [
+        330,
+        58
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            2009
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "ae.safetensors"
+      ],
+      "title": "VAE (ae)"
+    },
+    {
+      "id": 2005,
+      "type": "CLIPTextEncode",
+      "pos": [
+        370,
+        1580
+      ],
+      "size": [
+        400,
+        180
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 2003
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            2005
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "a vintage travel poster that reads \"Z-IMAGE\", snowy mountains, art deco, bold clean typography, vibrant colors"
+      ],
+      "title": "Positive",
+      "color": "#223322",
+      "bgcolor": "#223322"
+    },
+    {
+      "id": 2006,
+      "type": "CLIPTextEncode",
+      "pos": [
+        370,
+        1800
+      ],
+      "size": [
+        400,
+        120
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 2004
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            2006
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "title": "Negative (ignored at CFG 1)",
+      "color": "#332222",
+      "bgcolor": "#332222"
+    },
+    {
+      "id": 2007,
+      "type": "EmptySD3LatentImage",
+      "pos": [
+        370,
+        1950
+      ],
+      "size": [
+        400,
+        106
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            2007
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptySD3LatentImage"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1
+      ],
+      "title": "Canvas"
+    },
+    {
+      "id": 2008,
+      "type": "KSampler",
+      "pos": [
+        800,
+        1580
+      ],
+      "size": [
+        330,
+        262
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 2002
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 2005
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 2006
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 2007
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            2008
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        0,
+        "randomize",
+        8,
+        1.0,
+        "dpmpp_sde",
+        "beta",
+        1.0
+      ],
+      "title": "Sampler (8 steps, CFG 1)"
+    },
+    {
+      "id": 2009,
+      "type": "VAEDecode",
+      "pos": [
+        1160,
+        1580
+      ],
+      "size": [
+        210,
+        46
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 2008
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 2009
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            2010,
+            2012
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 2010,
+      "type": "SaveImage",
+      "pos": [
+        1160,
+        1680
+      ],
+      "size": [
+        460,
+        500
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 2010
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ZIMAGE"
+      ],
+      "title": "Output"
+    },
+    {
+      "id": 2099,
+      "type": "Note",
+      "pos": [
+        0,
+        2040
+      ],
+      "size": [
+        770,
+        260
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "Note"
+      },
+      "widgets_values": [
+        "Z-IMAGE TURBO - fast TEXT to IMAGE (local, free)\n\nNear-instant generation (~3-6s) with the cleanest in-image TEXT of any\nlocal model. Great for quick ideas / replacing Midjourney for fast work.\n\nKEY SETTINGS (already set):\n  - KSampler: steps 8, CFG 1.0, sampler dpmpp_sde, scheduler beta\n    (Turbo model: keep CFG=1, steps 4-10. More steps != much better.)\n  - ModelSamplingAuraFlow shift = 3\n  - CLIPLoader type MUST be 'lumina2' (Z-Image uses it), encoder qwen_3_4b\n  - Negative prompt is ignored at CFG 1 (leave empty).\n\nFor best text rendering, describe the exact words in quotes in the prompt."
+      ],
+      "color": "#443322",
+      "bgcolor": "#443322"
+    },
+    {
+      "id": 2100,
+      "type": "UpscaleModelLoader",
+      "pos": [
+        0,
+        2390
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "UPSCALE_MODEL",
+          "type": "UPSCALE_MODEL",
+          "links": [
+            2011
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UpscaleModelLoader"
+      },
+      "widgets_values": [
+        "4x-UltraSharp.pth"
+      ],
+      "title": "4K upscale model"
+    },
+    {
+      "id": 2101,
+      "type": "ImageUpscaleWithModel",
+      "pos": [
+        340,
+        2390
+      ],
+      "size": [
+        260,
+        46
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "upscale_model",
+          "type": "UPSCALE_MODEL",
+          "link": 2011
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 2012
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            2013
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageUpscaleWithModel"
+      },
+      "widgets_values": [],
+      "title": "Upscale 4x"
+    },
+    {
+      "id": 2102,
+      "type": "ImageScaleToMaxDimension",
+      "pos": [
+        640,
+        2390
+      ],
+      "size": [
+        280,
+        82
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 2013
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            2014
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageScaleToMaxDimension"
+      },
+      "widgets_values": [
+        "lanczos",
+        3840
+      ],
+      "title": "Cap longest side -> 4K (3840)"
+    },
+    {
+      "id": 2103,
+      "type": "SaveImage",
+      "pos": [
+        960,
+        2390
+      ],
+      "size": [
+        420,
+        420
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 2014
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ZIMAGE_4K"
+      ],
+      "title": "4K output"
+    },
+    {
+      "id": 3001,
+      "type": "UnetLoaderGGUF",
+      "pos": [
+        0,
+        3300
+      ],
+      "size": [
+        330,
+        58
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            3001
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UnetLoaderGGUF"
+      },
+      "widgets_values": [
+        "qwen-image-edit-2511-Q4_K_M.gguf"
+      ],
+      "title": "Qwen-Image-Edit (GGUF Q4)"
+    },
+    {
+      "id": 3002,
+      "type": "ModelSamplingAuraFlow",
+      "pos": [
+        0,
+        3400
+      ],
+      "size": [
+        330,
+        58
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 3001
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            3002
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ModelSamplingAuraFlow"
+      },
+      "widgets_values": [
+        3.1
+      ],
+      "title": "ModelSampling (3.1)"
+    },
+    {
+      "id": 3003,
+      "type": "CFGNorm",
+      "pos": [
+        0,
+        3500
+      ],
+      "size": [
+        330,
+        58
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 3002
+        }
+      ],
+      "outputs": [
+        {
+          "name": "patched_model",
+          "type": "MODEL",
+          "links": [
+            3003
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CFGNorm"
+      },
+      "widgets_values": [
+        1.0
+      ],
+      "title": "CFGNorm"
+    },
+    {
+      "id": 3004,
+      "type": "CLIPLoader",
+      "pos": [
+        0,
+        3600
+      ],
+      "size": [
+        330,
+        106
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            3004,
+            3005
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+        "qwen_image",
+        "default"
+      ],
+      "title": "Qwen2.5-VL encoder"
+    },
+    {
+      "id": 3005,
+      "type": "VAELoader",
+      "pos": [
+        0,
+        3740
+      ],
+      "size": [
+        330,
+        58
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            3006,
+            3007,
+            3008,
+            3009
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "qwen_image_vae.safetensors"
+      ],
+      "title": "Qwen VAE"
+    },
+    {
+      "id": 3006,
+      "type": "LoadImage",
+      "pos": [
+        0,
+        3840
+      ],
+      "size": [
+        330,
+        330
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            3010
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "example.png",
+        "image"
+      ],
+      "title": "Image to edit"
+    },
+    {
+      "id": 3007,
+      "type": "FluxKontextImageScale",
+      "pos": [
+        370,
+        3840
+      ],
+      "size": [
+        260,
+        46
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 3010
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            3011,
+            3012,
+            3013
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FluxKontextImageScale"
+      },
+      "widgets_values": [],
+      "title": "Auto-scale"
+    },
+    {
+      "id": 3008,
+      "type": "TextEncodeQwenImageEditPlus",
+      "pos": [
+        370,
+        3300
+      ],
+      "size": [
+        420,
+        200
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 3004
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 3006
+        },
+        {
+          "name": "image1",
+          "type": "IMAGE",
+          "link": 3011
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            3014
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "TextEncodeQwenImageEditPlus"
+      },
+      "widgets_values": [
+        "change the background to a sunny tropical beach, keep the subject unchanged"
+      ],
+      "title": "Edit instruction (positive)",
+      "color": "#223322",
+      "bgcolor": "#223322"
+    },
+    {
+      "id": 3009,
+      "type": "TextEncodeQwenImageEditPlus",
+      "pos": [
+        370,
+        3540
+      ],
+      "size": [
+        420,
+        120
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 3005
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 3007
+        },
+        {
+          "name": "image1",
+          "type": "IMAGE",
+          "link": 3012
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            3015
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "TextEncodeQwenImageEditPlus"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "title": "Negative (empty)",
+      "color": "#332222",
+      "bgcolor": "#332222"
+    },
+    {
+      "id": 3010,
+      "type": "FluxKontextMultiReferenceLatentMethod",
+      "pos": [
+        820,
+        3300
+      ],
+      "size": [
+        300,
+        82
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 3014
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            3016
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FluxKontextMultiReferenceLatentMethod"
+      },
+      "widgets_values": [
+        "index_timestep_zero"
+      ],
+      "title": "Ref-latent (positive)"
+    },
+    {
+      "id": 3011,
+      "type": "FluxKontextMultiReferenceLatentMethod",
+      "pos": [
+        820,
+        3420
+      ],
+      "size": [
+        300,
+        82
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 3015
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            3017
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FluxKontextMultiReferenceLatentMethod"
+      },
+      "widgets_values": [
+        "index_timestep_zero"
+      ],
+      "title": "Ref-latent (negative)"
+    },
+    {
+      "id": 3012,
+      "type": "VAEEncode",
+      "pos": [
+        820,
+        3840
+      ],
+      "size": [
+        210,
+        46
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "pixels",
+          "type": "IMAGE",
+          "link": 3013
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 3008
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            3018
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEEncode"
+      },
+      "widgets_values": [],
+      "title": "Image -> latent"
+    },
+    {
+      "id": 3013,
+      "type": "KSampler",
+      "pos": [
+        1150,
+        3300
+      ],
+      "size": [
+        330,
+        262
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 3003
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 3016
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 3017
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 3018
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            3019
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        0,
+        "randomize",
+        20,
+        4.0,
+        "euler",
+        "simple",
+        1.0
+      ],
+      "title": "Sampler (20 steps, CFG 4)"
+    },
+    {
+      "id": 3014,
+      "type": "VAEDecode",
+      "pos": [
+        1500,
+        3300
+      ],
+      "size": [
+        210,
+        46
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 3019
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 3009
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            3020,
+            3022
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 3015,
+      "type": "SaveImage",
+      "pos": [
+        1500,
+        3400
+      ],
+      "size": [
+        460,
+        500
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 3020
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "QWEN_EDIT"
+      ],
+      "title": "Edited output"
+    },
+    {
+      "id": 3099,
+      "type": "Note",
+      "pos": [
+        0,
+        4190
+      ],
+      "size": [
+        1120,
+        300
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "Note"
+      },
+      "widgets_values": [
+        "QWEN-IMAGE-EDIT 2511 - instruction IMAGE EDITING (local, free)\n\nLoad an image + type an instruction in 'Edit instruction' -> edited image.\nThe surgical editor: precise text/object/color/identity edits.\n\nEXAMPLES:  change the jacket to red  |  remove the person on the left  |\n  change the sign text to 'OPEN 24H'  |  make it night with neon lights  |\n  put this character in a suit (keeps the face)\n\nSETTINGS: steps 20 (raise to 40 for max quality), CFG 4.0, euler/simple.\n  Lower CFG (2.5-3)=gentler edits, higher (4-5)=stronger instruction.\n  This graph uses the official 2511 wiring (ModelSamplingAuraFlow 3.1 +\n  CFGNorm + FluxKontextMultiReferenceLatentMethod) - required, don't remove.\n\nMULTI-IMAGE EDIT: connect more images to image2 / image3 on the encoders\n  (e.g. 'put the hat from image2 on the person in image1').\nHEAVY 20B model: ~60-170s/image on 16GB (offloads to RAM)."
+      ],
+      "color": "#443322",
+      "bgcolor": "#443322"
+    },
+    {
+      "id": 3100,
+      "type": "UpscaleModelLoader",
+      "pos": [
+        0,
+        4580
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "UPSCALE_MODEL",
+          "type": "UPSCALE_MODEL",
+          "links": [
+            3021
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UpscaleModelLoader"
+      },
+      "widgets_values": [
+        "4x-UltraSharp.pth"
+      ],
+      "title": "4K upscale model"
+    },
+    {
+      "id": 3101,
+      "type": "ImageUpscaleWithModel",
+      "pos": [
+        340,
+        4580
+      ],
+      "size": [
+        260,
+        46
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "upscale_model",
+          "type": "UPSCALE_MODEL",
+          "link": 3021
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 3022
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            3023
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageUpscaleWithModel"
+      },
+      "widgets_values": [],
+      "title": "Upscale 4x"
+    },
+    {
+      "id": 3102,
+      "type": "ImageScaleToMaxDimension",
+      "pos": [
+        640,
+        4580
+      ],
+      "size": [
+        280,
+        82
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 3023
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            3024
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageScaleToMaxDimension"
+      },
+      "widgets_values": [
+        "lanczos",
+        3840
+      ],
+      "title": "Cap longest side -> 4K (3840)"
+    },
+    {
+      "id": 3103,
+      "type": "SaveImage",
+      "pos": [
+        960,
+        4580
+      ],
+      "size": [
+        420,
+        420
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 3024
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "QWEN_EDIT_4K"
+      ],
+      "title": "4K output"
+    },
+    {
+      "id": 4001,
+      "type": "UNETLoader",
+      "pos": [
+        0,
+        5080
+      ],
+      "size": [
+        320,
+        82
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            4001
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "z_image_turbo_bf16.safetensors",
+        "default"
+      ],
+      "title": "Z-Image model"
+    },
+    {
+      "id": 4002,
+      "type": "ModelSamplingAuraFlow",
+      "pos": [
+        0,
+        5200
+      ],
+      "size": [
+        320,
+        58
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 4001
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            4002
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ModelSamplingAuraFlow"
+      },
+      "widgets_values": [
+        3
+      ]
+    },
+    {
+      "id": 4030,
+      "type": "ModelPatchLoader",
+      "pos": [
+        0,
+        5300
+      ],
+      "size": [
+        320,
+        58
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL_PATCH",
+          "type": "MODEL_PATCH",
+          "links": [
+            4003
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ModelPatchLoader"
+      },
+      "widgets_values": [
+        "Z-Image-Turbo-Fun-Controlnet-Union-2.1.safetensors"
+      ],
+      "title": "ControlNet patch"
+    },
+    {
+      "id": 4003,
+      "type": "CLIPLoader",
+      "pos": [
+        0,
+        5400
+      ],
+      "size": [
+        320,
+        106
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            4007,
+            4008
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "qwen_3_4b.safetensors",
+        "lumina2",
+        "default"
+      ],
+      "title": "Encoder (lumina2)"
+    },
+    {
+      "id": 4004,
+      "type": "VAELoader",
+      "pos": [
+        0,
+        5540
+      ],
+      "size": [
+        320,
+        58
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            4004,
+            4014
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "ae.safetensors"
+      ],
+      "title": "VAE"
+    },
+    {
+      "id": 4020,
+      "type": "LoadImage",
+      "pos": [
+        0,
+        5640
+      ],
+      "size": [
+        320,
+        330
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            4009
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "example.png",
+        "image"
+      ],
+      "title": "Control source"
+    },
+    {
+      "id": 4021,
+      "type": "AIO_Preprocessor",
+      "pos": [
+        360,
+        5640
+      ],
+      "size": [
+        330,
+        82
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 4009
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            4005
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AIO_Preprocessor"
+      },
+      "widgets_values": [
+        "CannyEdgePreprocessor",
+        1024
+      ],
+      "title": "Preprocessor (canny/depth/pose)"
+    },
+    {
+      "id": 4031,
+      "type": "ZImageFunControlnet",
+      "pos": [
+        700,
+        5080
+      ],
+      "size": [
+        320,
+        150
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 4002
+        },
+        {
+          "name": "model_patch",
+          "type": "MODEL_PATCH",
+          "link": 4003
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 4004
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 4005
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            4006
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ZImageFunControlnet"
+      },
+      "widgets_values": [
+        0.9
+      ],
+      "title": "Apply ControlNet (strength)"
+    },
+    {
+      "id": 4005,
+      "type": "CLIPTextEncode",
+      "pos": [
+        360,
+        5080
+      ],
+      "size": [
+        330,
+        150
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 4007
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            4010
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "a detailed marble statue, dramatic museum lighting, photorealistic"
+      ],
+      "title": "Positive",
+      "color": "#223322",
+      "bgcolor": "#223322"
+    },
+    {
+      "id": 4006,
+      "type": "CLIPTextEncode",
+      "pos": [
+        360,
+        5260
+      ],
+      "size": [
+        330,
+        100
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 4008
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            4011
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "title": "Negative",
+      "color": "#332222",
+      "bgcolor": "#332222"
+    },
+    {
+      "id": 4007,
+      "type": "EmptySD3LatentImage",
+      "pos": [
+        360,
+        5420
+      ],
+      "size": [
+        330,
+        106
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            4012
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptySD3LatentImage"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1
+      ],
+      "title": "Canvas"
+    },
+    {
+      "id": 4008,
+      "type": "KSampler",
+      "pos": [
+        1050,
+        5080
+      ],
+      "size": [
+        320,
+        262
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 4006
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 4010
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 4011
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 4012
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            4013
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        0,
+        "randomize",
+        8,
+        1.0,
+        "dpmpp_sde",
+        "beta",
+        1.0
+      ],
+      "title": "Sampler (8 steps, CFG 1)"
+    },
+    {
+      "id": 4009,
+      "type": "VAEDecode",
+      "pos": [
+        1390,
+        5080
+      ],
+      "size": [
+        210,
+        46
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 4013
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 4014
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            4015,
+            4017
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 4010,
+      "type": "SaveImage",
+      "pos": [
+        1390,
+        5180
+      ],
+      "size": [
+        460,
+        500
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 4015
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ZIMAGE_CN"
+      ],
+      "title": "Output"
+    },
+    {
+      "id": 4099,
+      "type": "Note",
+      "pos": [
+        0,
+        5990
+      ],
+      "size": [
+        1020,
+        280
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "Note"
+      },
+      "widgets_values": [
+        "Z-IMAGE + CONTROLNET - structure-controlled generation (local)\n\nLock the COMPOSITION (pose / depth / edges) of a source image, then\ngenerate something new that follows that structure.\n\nHOW:\n  1. Load a control-source image (bottom-left).\n  2. AIO_Preprocessor extracts the control map. Pick the type:\n       CannyEdgePreprocessor      = outlines (default, no extra download)\n       DepthAnythingV2Preprocessor= depth (downloads a small model 1st run)\n       DWPreprocessor / OpenposePreprocessor = body pose\n  3. Write your prompt. Run.\n\nSTRENGTH (ZImageFunControlnet): 0.6-1.0. Lower=looser, higher=stricter.\nUses Z-Image Fun ControlNet via ModelPatchLoader (in models/model_patches)\n+ ZImageFunControlnet - NOT the normal ControlNet nodes. Steps 8 / CFG 1."
+      ],
+      "color": "#443322",
+      "bgcolor": "#443322"
+    },
+    {
+      "id": 4100,
+      "type": "UpscaleModelLoader",
+      "pos": [
+        0,
+        6360
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "UPSCALE_MODEL",
+          "type": "UPSCALE_MODEL",
+          "links": [
+            4016
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UpscaleModelLoader"
+      },
+      "widgets_values": [
+        "4x-UltraSharp.pth"
+      ],
+      "title": "4K upscale model"
+    },
+    {
+      "id": 4101,
+      "type": "ImageUpscaleWithModel",
+      "pos": [
+        340,
+        6360
+      ],
+      "size": [
+        260,
+        46
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "upscale_model",
+          "type": "UPSCALE_MODEL",
+          "link": 4016
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 4017
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            4018
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageUpscaleWithModel"
+      },
+      "widgets_values": [],
+      "title": "Upscale 4x"
+    },
+    {
+      "id": 4102,
+      "type": "ImageScaleToMaxDimension",
+      "pos": [
+        640,
+        6360
+      ],
+      "size": [
+        280,
+        82
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 4018
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            4019
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageScaleToMaxDimension"
+      },
+      "widgets_values": [
+        "lanczos",
+        3840
+      ],
+      "title": "Cap longest side -> 4K (3840)"
+    },
+    {
+      "id": 4103,
+      "type": "SaveImage",
+      "pos": [
+        960,
+        6360
+      ],
+      "size": [
+        420,
+        420
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 4019
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ZIMAGE_CN_4K"
+      ],
+      "title": "4K output"
+    },
+    {
+      "id": 5001,
+      "type": "LoadImage",
+      "pos": [
+        0,
+        7200
+      ],
+      "size": [
+        360,
+        400
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            5001
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "example.png",
+        "image"
+      ],
+      "title": "Input image"
+    },
+    {
+      "id": 5002,
+      "type": "AILab_QwenVL_GGUF",
+      "pos": [
+        400,
+        7200
+      ],
+      "size": [
+        420,
+        300
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 5001
+        }
+      ],
+      "outputs": [
+        {
+          "name": "RESPONSE",
+          "type": "STRING",
+          "links": [
+            5002
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AILab_QwenVL_GGUF"
+      },
+      "widgets_values": [
+        "Qwen3VL-8B-Instruct-Q8_0.gguf",
+        "\ud83d\uddbc\ufe0f Detailed Description",
+        "",
+        512,
+        true,
+        1
+      ],
+      "title": "Qwen3-VL (image->text)",
+      "color": "#223344",
+      "bgcolor": "#223344"
+    },
+    {
+      "id": 5003,
+      "type": "iToolsPreviewText",
+      "pos": [
+        860,
+        7200
+      ],
+      "size": [
+        420,
+        300
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 5002
+        }
+      ],
+      "outputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "links": [],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "iToolsPreviewText"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "title": "Result text"
+    },
+    {
+      "id": 5099,
+      "type": "Note",
+      "pos": [
+        0,
+        7630
+      ],
+      "size": [
+        820,
+        260
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "Note"
+      },
+      "widgets_values": [
+        "IMAGE -> TEXT  (Qwen3-VL, 100% local)\n\nLoad an image -> get a description / prompt back.\n\nUSES:\n  - Caption / alt-text for any image\n  - PROMPT EXTRACTION: describe a reference you like, then paste the\n    text into the Flux 2 or Z-Image prompt box to recreate its style\n  - Visual Q&A via 'custom_prompt' (e.g. 'read the text in this image')\n\nPRESETS: Tags / Simple / Detailed / Ultra Detailed / Cinematic /\n  Analysis / Short Story / Prompt Refine & Expand.\n  Anything typed in custom_prompt overrides the preset.\n\nMODEL: Qwen3VL-8B-Instruct-Q8 (best). Pick a 4B variant for speed."
+      ],
+      "color": "#443322",
+      "bgcolor": "#443322"
+    },
+    {
+      "id": 9000,
+      "type": "LoadImage",
+      "pos": [
+        0,
+        9000
+      ],
+      "size": [
+        330,
+        330
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            90002
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "example.png",
+        "image"
+      ],
+      "title": "Any image to upscale"
+    },
+    {
+      "id": 9001,
+      "type": "UpscaleModelLoader",
+      "pos": [
+        370,
+        9000
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "UPSCALE_MODEL",
+          "type": "UPSCALE_MODEL",
+          "links": [
+            90001
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UpscaleModelLoader"
+      },
+      "widgets_values": [
+        "4x-UltraSharp.pth"
+      ],
+      "title": "4K upscale model"
+    },
+    {
+      "id": 9002,
+      "type": "ImageUpscaleWithModel",
+      "pos": [
+        370,
+        9100
+      ],
+      "size": [
+        260,
+        46
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "upscale_model",
+          "type": "UPSCALE_MODEL",
+          "link": 90001
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 90002
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            90003
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageUpscaleWithModel"
+      },
+      "widgets_values": [],
+      "title": "Upscale 4x"
+    },
+    {
+      "id": 9003,
+      "type": "ImageScaleToMaxDimension",
+      "pos": [
+        680,
+        9000
+      ],
+      "size": [
+        280,
+        82
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 90003
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            90004
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageScaleToMaxDimension"
+      },
+      "widgets_values": [
+        "lanczos",
+        3840
+      ],
+      "title": "Cap longest side -> 4K"
+    },
+    {
+      "id": 9004,
+      "type": "SaveImage",
+      "pos": [
+        980,
+        9000
+      ],
+      "size": [
+        460,
+        460
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 90004
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "MASTER_4K"
+      ],
+      "title": "4K output"
+    },
+    {
+      "id": 99999,
+      "type": "Note",
+      "pos": [
+        -1700,
+        -250
+      ],
+      "size": [
+        640,
+        620
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "########  MASTER WORKFLOW  ########\n\nEvery capability in ONE file, as separate MODULES (the big coloured boxes).\n\nHOW TO USE:\n  1. Only Module A (Flux 2) is ON by default. Everything else is bypassed.\n  2. To use another module: click its big group title to select it,\n     then press Ctrl+B to ENABLE it. Press Ctrl+B again to turn it OFF.\n  3. Turn OFF the module you are done with so two heavy models don't run\n     at once (16GB). Each module has its own Save node + prompt.\n  4. Module F (4K upscaler) is standalone - load any image, enable, run.\n\nMODULES:\n  A Flux 2     - best quality t2i / i2i / multi-reference (+4K group inside)\n  B Z-Image    - fastest t2i, best text-in-image (+4K group inside)\n  C Qwen-Edit  - 'change/remove/edit' instructions (heavy 20B, +4K inside)\n  D ControlNet - lock pose/depth/edges (+4K group inside)\n  E Image->Text- describe an image / extract a prompt -> paste into A or B\n  F 4K Upscaler- upscale any image up to 3840px\n\nEach generating module ALSO has its own '4K UPSCALE' sub-group (green) -\nenable it the same way (Ctrl+B) to save a 4K version of that module's output."
+      ],
+      "color": "#5e4a1c",
+      "bgcolor": "#5e4a1c",
+      "title": "READ ME"
+    }
+  ],
+  "links": [
+    [
+      1001,
+      1030,
+      0,
+      1031,
+      0,
+      "IMAGE"
+    ],
+    [
+      1002,
+      1031,
+      0,
+      1032,
+      0,
+      "IMAGE"
+    ],
+    [
+      1003,
+      1003,
+      0,
+      1032,
+      1,
+      "VAE"
+    ],
+    [
+      1004,
+      1032,
+      0,
+      1033,
+      1,
+      "LATENT"
+    ],
+    [
+      1005,
+      1040,
+      0,
+      1041,
+      0,
+      "IMAGE"
+    ],
+    [
+      1006,
+      1041,
+      0,
+      1042,
+      0,
+      "IMAGE"
+    ],
+    [
+      1007,
+      1003,
+      0,
+      1042,
+      1,
+      "VAE"
+    ],
+    [
+      1008,
+      1042,
+      0,
+      1043,
+      1,
+      "LATENT"
+    ],
+    [
+      1009,
+      1050,
+      0,
+      1051,
+      0,
+      "IMAGE"
+    ],
+    [
+      1010,
+      1051,
+      0,
+      1052,
+      0,
+      "IMAGE"
+    ],
+    [
+      1011,
+      1003,
+      0,
+      1052,
+      1,
+      "VAE"
+    ],
+    [
+      1012,
+      1052,
+      0,
+      1053,
+      1,
+      "LATENT"
+    ],
+    [
+      1013,
+      1005,
+      0,
+      1033,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      1014,
+      1033,
+      0,
+      1043,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      1015,
+      1043,
+      0,
+      1053,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      1016,
+      1060,
+      0,
+      1061,
+      0,
+      "UPSCALE_MODEL"
+    ],
+    [
+      1017,
+      1012,
+      0,
+      1061,
+      1,
+      "IMAGE"
+    ],
+    [
+      1018,
+      1061,
+      0,
+      1062,
+      0,
+      "IMAGE"
+    ],
+    [
+      1019,
+      1062,
+      0,
+      1063,
+      0,
+      "IMAGE"
+    ],
+    [
+      1020,
+      1001,
+      0,
+      1007,
+      0,
+      "MODEL"
+    ],
+    [
+      1021,
+      1002,
+      0,
+      1004,
+      0,
+      "CLIP"
+    ],
+    [
+      1022,
+      1004,
+      0,
+      1005,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      1023,
+      1053,
+      0,
+      1007,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      1024,
+      1006,
+      0,
+      1011,
+      4,
+      "LATENT"
+    ],
+    [
+      1025,
+      1010,
+      0,
+      1011,
+      0,
+      "NOISE"
+    ],
+    [
+      1026,
+      1007,
+      0,
+      1011,
+      1,
+      "GUIDER"
+    ],
+    [
+      1027,
+      1008,
+      0,
+      1011,
+      2,
+      "SAMPLER"
+    ],
+    [
+      1028,
+      1009,
+      0,
+      1011,
+      3,
+      "SIGMAS"
+    ],
+    [
+      1029,
+      1011,
+      0,
+      1012,
+      0,
+      "LATENT"
+    ],
+    [
+      1030,
+      1003,
+      0,
+      1012,
+      1,
+      "VAE"
+    ],
+    [
+      1031,
+      1012,
+      0,
+      1013,
+      0,
+      "IMAGE"
+    ],
+    [
+      2001,
+      2001,
+      0,
+      2002,
+      0,
+      "MODEL"
+    ],
+    [
+      2002,
+      2002,
+      0,
+      2008,
+      0,
+      "MODEL"
+    ],
+    [
+      2003,
+      2003,
+      0,
+      2005,
+      0,
+      "CLIP"
+    ],
+    [
+      2004,
+      2003,
+      0,
+      2006,
+      0,
+      "CLIP"
+    ],
+    [
+      2005,
+      2005,
+      0,
+      2008,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      2006,
+      2006,
+      0,
+      2008,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      2007,
+      2007,
+      0,
+      2008,
+      3,
+      "LATENT"
+    ],
+    [
+      2008,
+      2008,
+      0,
+      2009,
+      0,
+      "LATENT"
+    ],
+    [
+      2009,
+      2004,
+      0,
+      2009,
+      1,
+      "VAE"
+    ],
+    [
+      2010,
+      2009,
+      0,
+      2010,
+      0,
+      "IMAGE"
+    ],
+    [
+      2011,
+      2100,
+      0,
+      2101,
+      0,
+      "UPSCALE_MODEL"
+    ],
+    [
+      2012,
+      2009,
+      0,
+      2101,
+      1,
+      "IMAGE"
+    ],
+    [
+      2013,
+      2101,
+      0,
+      2102,
+      0,
+      "IMAGE"
+    ],
+    [
+      2014,
+      2102,
+      0,
+      2103,
+      0,
+      "IMAGE"
+    ],
+    [
+      3001,
+      3001,
+      0,
+      3002,
+      0,
+      "MODEL"
+    ],
+    [
+      3002,
+      3002,
+      0,
+      3003,
+      0,
+      "MODEL"
+    ],
+    [
+      3003,
+      3003,
+      0,
+      3013,
+      0,
+      "MODEL"
+    ],
+    [
+      3004,
+      3004,
+      0,
+      3008,
+      0,
+      "CLIP"
+    ],
+    [
+      3005,
+      3004,
+      0,
+      3009,
+      0,
+      "CLIP"
+    ],
+    [
+      3006,
+      3005,
+      0,
+      3008,
+      1,
+      "VAE"
+    ],
+    [
+      3007,
+      3005,
+      0,
+      3009,
+      1,
+      "VAE"
+    ],
+    [
+      3008,
+      3005,
+      0,
+      3012,
+      1,
+      "VAE"
+    ],
+    [
+      3009,
+      3005,
+      0,
+      3014,
+      1,
+      "VAE"
+    ],
+    [
+      3010,
+      3006,
+      0,
+      3007,
+      0,
+      "IMAGE"
+    ],
+    [
+      3011,
+      3007,
+      0,
+      3008,
+      2,
+      "IMAGE"
+    ],
+    [
+      3012,
+      3007,
+      0,
+      3009,
+      2,
+      "IMAGE"
+    ],
+    [
+      3013,
+      3007,
+      0,
+      3012,
+      0,
+      "IMAGE"
+    ],
+    [
+      3014,
+      3008,
+      0,
+      3010,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      3015,
+      3009,
+      0,
+      3011,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      3016,
+      3010,
+      0,
+      3013,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      3017,
+      3011,
+      0,
+      3013,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      3018,
+      3012,
+      0,
+      3013,
+      3,
+      "LATENT"
+    ],
+    [
+      3019,
+      3013,
+      0,
+      3014,
+      0,
+      "LATENT"
+    ],
+    [
+      3020,
+      3014,
+      0,
+      3015,
+      0,
+      "IMAGE"
+    ],
+    [
+      3021,
+      3100,
+      0,
+      3101,
+      0,
+      "UPSCALE_MODEL"
+    ],
+    [
+      3022,
+      3014,
+      0,
+      3101,
+      1,
+      "IMAGE"
+    ],
+    [
+      3023,
+      3101,
+      0,
+      3102,
+      0,
+      "IMAGE"
+    ],
+    [
+      3024,
+      3102,
+      0,
+      3103,
+      0,
+      "IMAGE"
+    ],
+    [
+      4001,
+      4001,
+      0,
+      4002,
+      0,
+      "MODEL"
+    ],
+    [
+      4002,
+      4002,
+      0,
+      4031,
+      0,
+      "MODEL"
+    ],
+    [
+      4003,
+      4030,
+      0,
+      4031,
+      1,
+      "MODEL_PATCH"
+    ],
+    [
+      4004,
+      4004,
+      0,
+      4031,
+      2,
+      "VAE"
+    ],
+    [
+      4005,
+      4021,
+      0,
+      4031,
+      3,
+      "IMAGE"
+    ],
+    [
+      4006,
+      4031,
+      0,
+      4008,
+      0,
+      "MODEL"
+    ],
+    [
+      4007,
+      4003,
+      0,
+      4005,
+      0,
+      "CLIP"
+    ],
+    [
+      4008,
+      4003,
+      0,
+      4006,
+      0,
+      "CLIP"
+    ],
+    [
+      4009,
+      4020,
+      0,
+      4021,
+      0,
+      "IMAGE"
+    ],
+    [
+      4010,
+      4005,
+      0,
+      4008,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      4011,
+      4006,
+      0,
+      4008,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      4012,
+      4007,
+      0,
+      4008,
+      3,
+      "LATENT"
+    ],
+    [
+      4013,
+      4008,
+      0,
+      4009,
+      0,
+      "LATENT"
+    ],
+    [
+      4014,
+      4004,
+      0,
+      4009,
+      1,
+      "VAE"
+    ],
+    [
+      4015,
+      4009,
+      0,
+      4010,
+      0,
+      "IMAGE"
+    ],
+    [
+      4016,
+      4100,
+      0,
+      4101,
+      0,
+      "UPSCALE_MODEL"
+    ],
+    [
+      4017,
+      4009,
+      0,
+      4101,
+      1,
+      "IMAGE"
+    ],
+    [
+      4018,
+      4101,
+      0,
+      4102,
+      0,
+      "IMAGE"
+    ],
+    [
+      4019,
+      4102,
+      0,
+      4103,
+      0,
+      "IMAGE"
+    ],
+    [
+      5001,
+      5001,
+      0,
+      5002,
+      0,
+      "IMAGE"
+    ],
+    [
+      5002,
+      5002,
+      0,
+      5003,
+      0,
+      "STRING"
+    ],
+    [
+      90001,
+      9001,
+      0,
+      9002,
+      0,
+      "UPSCALE_MODEL"
+    ],
+    [
+      90002,
+      9000,
+      0,
+      9002,
+      1,
+      "IMAGE"
+    ],
+    [
+      90003,
+      9002,
+      0,
+      9003,
+      0,
+      "IMAGE"
+    ],
+    [
+      90004,
+      9003,
+      0,
+      9004,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "A) FLUX 2  -  Text->Image / Image->Image / Reference (DEFAULT: ON)",
+      "bounding": [
+        -1230,
+        -530,
+        2460,
+        1916
+      ],
+      "color": "#1c3a5e",
+      "font_size": 28,
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "B) Z-IMAGE TURBO  -  fast Text->Image + best in-image text",
+      "bounding": [
+        -50,
+        1430,
+        1720,
+        1450
+      ],
+      "color": "#1c3a5e",
+      "font_size": 28,
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "C) QWEN-IMAGE-EDIT 2511  -  instruction image editing",
+      "bounding": [
+        -50,
+        3150,
+        2060,
+        1920
+      ],
+      "color": "#1c3a5e",
+      "font_size": 28,
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "D) Z-IMAGE + CONTROLNET  -  pose / depth / edge control",
+      "bounding": [
+        -50,
+        4930,
+        1950,
+        1920
+      ],
+      "color": "#1c3a5e",
+      "font_size": 28,
+      "flags": {}
+    },
+    {
+      "id": 5,
+      "title": "E) IMAGE->TEXT  -  caption / prompt-extract / VQA (Qwen3-VL)",
+      "bounding": [
+        -50,
+        7050,
+        1380,
+        910
+      ],
+      "color": "#1c3a5e",
+      "font_size": 28,
+      "flags": {}
+    },
+    {
+      "id": 6,
+      "title": "F) 4K UPSCALER  -  upscale ANY image up to 4K (independent)",
+      "bounding": [
+        -50,
+        8850,
+        1600,
+        720
+      ],
+      "color": "#1c5e2e",
+      "font_size": 28,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.35,
+      "offset": [
+        1900,
+        400
+      ]
+    }
+  },
+  "version": 0.4
+}
