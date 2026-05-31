@@ -50,5 +50,5 @@ Workflow 01 has a built-in 2× upscale group. For any image, you also have `4x-U
 - Every generating workflow (01/03/04/05) now has a **"4K UPSCALE" green group** (bypassed by default — Ctrl+B to enable). It runs 4x-UltraSharp then caps the longest side at 3840 = up to 4K.
 - The master also has **Module F**: a standalone upscaler — load any image, enable, run → 4K.
 
-## Remote access (status)
-ComfyUI currently binds 127.0.0.1 only and no tunnel tool is installed, so it is NOT reachable remotely yet. Secure options: **Tailscale** (private VPN, most secure), **Cloudflare quick tunnel** (instant public URL, unauthenticated), or **ngrok** (needs a free account token, supports a password). A tunnel running on this PC reaches ComfyUI at localhost — ComfyUI does NOT need restarting.
+## Remote access
+Not set up. ComfyUI binds 127.0.0.1 only (local-only). If remote access is wanted later, **Tailscale** (private encrypted VPN, only your own devices) is the recommended secure option.
