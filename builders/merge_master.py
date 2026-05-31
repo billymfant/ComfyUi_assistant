@@ -3,7 +3,7 @@ Each module is offset into its own vertical band, wrapped in a big labelled grou
 and (except module 0 = Flux 2) fully bypassed by default. Adds a standalone 4K
 upscaler module. The user enables a module by selecting its group + Ctrl+B.
 """
-import json
+import json, os
 
 WF="F:/ComfyUI/ComfyUI-Easy-Install/ComfyUI/user/default/workflows/"
 MODULES=[
@@ -90,7 +90,7 @@ allnodes.append({"id":99999,"type":"Note","pos":[-1700,-250],"size":[640,620],"f
 master={"id":"master","revision":0,"last_node_id":100000,"last_link_id":lid[0],
         "nodes":allnodes,"links":alllinks,"groups":groups,"config":{},
         "extra":{"ds":{"scale":0.35,"offset":[1900,400]}},"version":0.4}
-out="F:/APPS/COMFYUI_HELPER/00_MASTER_WORKFLOW.json"
+out=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),"workflows","00_MASTER_WORKFLOW.json")
 json.dump(master,open(out,"w",encoding="utf-8"),indent=2)
 
 # validate

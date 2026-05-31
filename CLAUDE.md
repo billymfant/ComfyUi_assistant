@@ -24,13 +24,34 @@ Helper project for building & testing ComfyUI workflows on the user's local mach
 - **05 Z-Image + ControlNet** — Fun ControlNet in `models/model_patches`, loaded via `ModelPatchLoader` + `ZImageFunControlnet` (patches MODEL — NOT standard ControlNet nodes). `AIO_Preprocessor` picks canny/depth/pose.
 - All generating workflows have a bypassed **4K UPSCALE** group: `ImageUpscaleWithModel`(4x-UltraSharp) → `ImageScaleToMaxDimension`(3840).
 
-## Build tooling in this repo
-- `wf_lib.py` — WF builder class (UI workflow JSON v0.4: add/connect/group/finalize+validate).
-- `gen_workflow.py` — generates the Flux 2 all-in-one (01).
-- `merge_master.py` — merges 01/03/04/05/02 into `00_MASTER_WORKFLOW.json` (offsets ids, bypasses non-Flux modules, adds standalone 4K upscaler).
-- `add_4k_upscale.py in.json out.json PREFIX` — injects a bypassed 4K upscale branch into any workflow.
-- `test_*.py` / `gen_from3.py` / `upscale_fusion.py` — API test/generation scripts.
-- `README_LOCAL_IMAGE_STACK.md` — user-facing guide (which workflow when, settings).
+## Project structure
+```
+COMFYUI_HELPER/
+├── CLAUDE.md                  # this file (project context)
+├── README.md                  # user-facing guide (which workflow when, settings)
+├── workflows/                 # the deliverables — load these in ComfyUI
+│   ├── 00_MASTER_WORKFLOW.json     # all modules in one (Flux2 on by default)
+│   ├── 01_FLUX2_AllInOne_T2I_I2I_Reference.json
+│   ├── 02_IMAGE_to_TEXT_QwenVL.json
+│   ├── 03_ZIMAGE_t2i.json
+│   ├── 04_QWEN_EDIT.json
+│   └── 05_ZIMAGE_controlnet.json
+├── builders/                  # workflow generators (write into ../workflows/)
+│   ├── wf_lib.py                   # WF builder class (UI JSON v0.4: add/connect/group/finalize+validate)
+│   ├── gen_workflow.py             # generates workflows/01 (Flux 2 all-in-one)
+│   ├── merge_master.py             # reads installed 01-05, writes workflows/00 master
+│   └── add_4k_upscale.py           # `add_4k_upscale.py in out PREFIX` injects bypassed 4K branch
+├── tests/                     # API smoke tests (POST /prompt, poll /history)
+│   ├── test_t2i.py test_ref.py test_2ref.py test_upscale.py
+│   └── gen_from3.py upscale_fusion.py
+├── scripts/                   # one-off model download shell scripts
+│   └── download_models.sh download_big.sh
+└── docs/
+    └── README_FLUX2_WORKFLOW.md    # original Flux-2-only guide
+```
+Workflow filenames here match what is installed in ComfyUI's `user/default/workflows/`.
+Builders use `__file__`-relative paths, so run them from anywhere:
+`python_embeded/python.exe builders/gen_workflow.py` and `.../merge_master.py`.
 
 ## Models present (in F:\ComfyUI\...\ComfyUI\models)
 diffusion_models: flux-2-klein-4b/9b-fp8, z_image_turbo_bf16 · unet: qwen-image-edit-2511-Q4_K_M.gguf ·

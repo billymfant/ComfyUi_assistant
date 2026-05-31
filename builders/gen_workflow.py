@@ -1,4 +1,5 @@
-import json
+import json, os
+_ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # repo root
 
 nodes=[]; links=[]; conns=[]; lid=[0]
 NDEF={}  # id -> node dict
@@ -137,5 +138,5 @@ wf={"id":"flux2-allinone","revision":0,"last_node_id":99,"last_link_id":lid[0],
     "nodes":nodes,"links":links,"groups":groups,"config":{},
     "extra":{"ds":{"scale":0.62,"offset":[1300,560]}},"version":0.4}
 
-open("FLUX2_AllInOne_T2I_I2I_Reference.json","w",encoding="utf-8").write(json.dumps(wf,indent=2))
+open(os.path.join(_ROOT,"workflows","01_FLUX2_AllInOne_T2I_I2I_Reference.json"),"w",encoding="utf-8").write(json.dumps(wf,indent=2))
 print("written. nodes:",len(nodes),"links:",len(links))

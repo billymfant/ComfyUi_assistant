@@ -19,3 +19,6 @@ __pycache__/
 *.png
 *.jpg
 *.jpeg
+
+# local claude settings
+.claude/settings.local.json
