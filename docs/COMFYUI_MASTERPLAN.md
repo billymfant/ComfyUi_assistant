@@ -89,7 +89,14 @@ User reported the 5B video looked low-quality. Findings + actions:
   - Tested graph (`tests/test_wan_animate.py`): `DiffusionModelLoaderKJ`(fp8_e4m3fn/bf16) → `LoraLoaderModelOnly`(lightx2v) ; `VHS_LoadVideo`→`DWPreprocessor`(pose_video) ; `LoadImage`→`ImageScale`(reference_image) → `WanAnimateToVideo`(pose-only; `continue_motion_max_frames`≥1, drop `extra_state_dict`) → `CFGGuider`(cfg 1)+`BasicScheduler`(simple,4)+`KSamplerSelect`(lcm)+`SamplerCustomAdvanced` → VAEDecode → SaveVideo.
   - Result: 49f @ 480×832 in **~60s** (4-step LCM + RAM offload of the 17G fp8 on 16G VRAM). Visibly better anatomy/motion than 5B Fun-Control, identity preserved.
   - **Gaps for FULL Wan-Animate** (face-detail + bg masking): needs a SAM2 node pack, onnxruntime-**gpu**, and ViTPose/YOLO onnx models — NOT installed. Pose-only path avoids all three.
-- **Still pending from the 4-pick upgrade:** general Wan 2.2 14B i2v/t2v model, and SeedVR2 upscaler weights. Lightning LoRA can also speed the general 14B path.
+### Full quality-upgrade results (2026-06-01, all four picks)
+- **Wan-Animate 14B (pose-only)** ✅ tested — `tests/test_wan_animate.py`, ~60s, best character-animation quality.
+- **Wan 2.2 14B i2v (general)** ✅ tested — `tests/test_wan14b_i2v.py`. Dual-expert MoE (`wan2.2_i2v_high_noise_14B_fp8_scaled` + `..._low_noise_...`, 14G each), **WanImageToVideo** (no clip_vision needed), **ModelSamplingSD3 shift 5**, `Wan2_1_VAE_bf16`, two-stage `KSamplerAdvanced` (high steps 0-2, low 2-4) + lightx2v, CFG 1, euler/simple. ~69s @ 832×480, visibly sharper than 5B.
+- **Lightning (lightx2v) LoRA** ✅ in use across the 14B paths (enables 4-step).
+- **SeedVR2 upscaler** — nodes present (`SeedVR2LoadDiTModel`/`...VAEModel`/`SeedVR2VideoUpscaler`); 3B fp8 + ema_vae auto-download; `tests/test_seedvr2_upscale.py`.
+- **Full Wan-Animate (face+SAM2 mask)** — deps installed: ViTPose `vitpose_h_wholebody_model.onnx`+`.bin` & `yolov10m.onnx` in `models/detection`; SAM2 node pack cloned (`ComfyUI-segment-anything-2`); run ONNX on **CPUExecutionProvider** (no onnxruntime-gpu needed); SAM2 `DownloadAndLoadSAM2Model` use **segmentor=single_image** with bboxes. Loadable workflow `workflows/08_WAN_ANIMATE_full.json` (author example, configured, torch-compile bypassed). NOTE: the hand-built API mask branch hit a SAM2 bbox-batch indexing quirk — the author's UI graph (WF 08) encodes the correct routing; pose-only is the validated automated path.
+
+**Quick recipe for finals:** Wan-Animate 14B (pose-only) for character motion; Wan 2.2 14B i2v for plain shots; lightx2v for speed; run video at 720p / 80+ frames / ~30 steps (or 4-step with lightx2v); SeedVR2 to upscale.
 - Convention (from `CLAUDE.md`): never ship an untested workflow — validate JSON link integrity AND run it live against the server, viewing the output, before claiming done. Verify HF download sizes.
 
 ## Open backlog (from HANDOFF, non-blocking)

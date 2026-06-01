@@ -25,6 +25,15 @@ A helper repo for building & testing local ComfyUI workflows for the user (billy
 - Repo restructured into `workflows/ builders/ tests/ scripts/ docs/` (builders use `__file__`-relative paths).
 - Separate project `F:\APPS\CREATIVE_OS` (a Node app) now has all 56 global skills in its `.claude/skills`.
 
+## UPDATE 2026-06-01 — Video & motion arsenal added (see `docs/COMFYUI_MASTERPLAN.md`)
+Built out per the masterplan (4 phases) + a quality-upgrade pass. All live-tested.
+- **06 Wan 2.2 5B** text/image→video. **07 skeleton→character animation** (Fun-Control 5B + DWPose). **08 Wan-Animate full** (loadable; ViTPose+SAM2, deps installed).
+- **builders/storyboard_to_video.py** — boards shots → keyframes (Flux 2, consistent character) → i2v → assembled film.
+- **Quality upgrade:** Wan-Animate 14B (pose-only, `tests/test_wan_animate.py`, ~60s) and Wan 2.2 14B i2v (`tests/test_wan14b_i2v.py`, ~69s) both > 5B; lightx2v Lightning LoRA (4-step); SeedVR2 upscaler (832×480→1872×1080, `tests/test_seedvr2_upscale.py`).
+- Models added (~75 GB): wan2.2_ti2v_5B, wan2.2_fun_control_5B, Wan2_2-Animate-14B fp8, wan2.2_i2v high+low 14B fp8, Wan2_1_VAE_bf16, umt5, lightx2v + relight LoRAs; detection onnx (ViTPose/YOLO) in models/detection; SAM2 node pack cloned.
+- Gotchas: 14B i2v uses ModelSamplingSD3 **shift 5** + Wan2.1 VAE + no clip_vision; Wan-Animate DiffusionModelLoaderKJ must omit extra_state_dict, WanAnimateToVideo continue_motion_max_frames≥1; SAM2 segmentor=single_image for bboxes; run detection onnx on CPUExecutionProvider (installed onnxruntime is OpenVINO/CPU, no CUDA provider).
+- Work committed on branch **feat/video-motion-arsenal** (not yet merged to main / pushed).
+
 ## Decisions / things NOT to redo
 - **Cloudflare tunnel was REMOVED at user request** ("not working"). Do not re-add Cloudflare. If remote access comes up again, the agreed-on secure option is **Tailscale** (needs the user's login on PC + phone).
 - Flux 2 Klein is the user's hero model; don't suggest swapping the base generator.
