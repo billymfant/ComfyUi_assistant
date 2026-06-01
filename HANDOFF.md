@@ -1,68 +1,56 @@
 # HANDOFF — COMFYUI_HELPER
 
-_Last updated: 2026-06-01. Read `CLAUDE.md` for full technical reference; this is the "where we are / what's next" summary._
+_Last updated: 2026-06-01. Read `CLAUDE.md` for technical reference and `docs/COMFYUI_MASTERPLAN.md` for the full motion-arsenal plan + every model/setting/gotcha. This file is the "where we are / what's next" summary._
 
 ## What this project is
-A helper repo for building & testing local ComfyUI workflows for the user (billymfant). Goal: a 100% local, free replacement for paid image generators. The actual ComfyUI install lives at `F:\ComfyUI\ComfyUI-Easy-Install` (server http://127.0.0.1:8188); this repo holds the workflow JSONs + the tooling that generates them.
+A helper repo for building & testing local ComfyUI workflows for the user (billymfant) — a **creative director / motion + graphic designer**. Goal: a 100% local, free ComfyUI arsenal that produces **all the assets a motion-graphics project needs** (stills, consistent characters, video, character animation, assembled films), replacing paid generators. The ComfyUI install lives at `F:\ComfyUI\ComfyUI-Easy-Install` (server http://127.0.0.1:8188); this repo holds the workflow JSONs + tooling.
 
 ## Environment (quick facts)
-- GPU: RTX 4080 SUPER (16 GB). ComfyUI v0.22.3. ~687 GB free.
+- GPU: RTX 4080 SUPER (16 GB). ComfyUI v0.22.3. 68 GB RAM. ~600 GB free after the model pulls below.
 - Embedded Python (use for everything): `F:/ComfyUI/ComfyUI-Easy-Install/python_embeded/python.exe`
 - Workflows install to: `F:\ComfyUI\ComfyUI-Easy-Install\ComfyUI\user\default\workflows` (names match `workflows/` here).
-- GitHub: https://github.com/billymfant/ComfyUi_assistant (remote `origin`, branch `main`, creds cached on the machine — `git push` just works).
+- GitHub: https://github.com/billymfant/ComfyUi_assistant (remote `origin`, branch `main`, creds cached — `git push` just works).
+- **Everything below is committed & pushed to `main`** (latest merge `348bf17`).
 
-## Status: DONE (all live-tested against the running server)
-| Workflow | Task | Model | Notes |
+## Status: the arsenal (all live-tested, GPU)
+| WF / tool | Task | Model | Notes |
 |---|---|---|---|
-| 00_MASTER | everything in one file | — | only Flux 2 active by default; Ctrl+B a group to enable |
-| 01_FLUX2_AllInOne | t2i / i2i / multi-reference | Flux 2 Klein | ref groups bypassed by default; +4K group |
-| 02_IMAGE_to_TEXT | caption / prompt-extract / VQA | Qwen3-VL 8B | ~18s |
-| 03_ZIMAGE_t2i | fast t2i + best in-image text | Z-Image Turbo | ~5s; +4K group |
-| 04_QWEN_EDIT | instruction editing | Qwen-Image-Edit 2511 | heavy 20B, ~60-170s; +4K group |
-| 05_ZIMAGE_controlnet | pose/depth/edge control | Z-Image + Fun ControlNet | +4K group |
+| 00–05 | stills / edit / controlnet / caption | Flux 2, Z-Image, Qwen-Edit, Qwen-VL | original set; +4K upscale groups |
+| **06_WAN_VIDEO** | text/image → video | Wan 2.2 5B | t2v ~105s, i2v ~96s @720p |
+| **07_WAN_SKELETON_ANIMATION** | skeleton → character animation | Wan Fun-Control 5B + DWPose | drop a character + driving video |
+| **08_WAN_ANIMATE_full** | faithful character animation (face+mask) | Wan-Animate 14B + ViTPose + SAM2 | **best quality**, ~64s, all GPU |
+| `builders/storyboard_to_video.py` | storyboard → assembled film | Flux2 keyframes → Wan 5B i2v → ffmpeg | consistent character across shots |
 
-- 4K upscaling added everywhere (4x-UltraSharp → cap longest side 3840). Verified true 3840px output.
-- Repo restructured into `workflows/ builders/ tests/ scripts/ docs/` (builders use `__file__`-relative paths).
-- Separate project `F:\APPS\CREATIVE_OS` (a Node app) now has all 56 global skills in its `.claude/skills`.
+Quality-upgrade models also tested: **Wan 2.2 14B i2v** (dual-expert, ~69s, sharper than 5B; `tests/test_wan14b_i2v.py`), **Wan-Animate 14B pose-only** (~60s; `tests/test_wan_animate.py`), **lightx2v Lightning LoRA** (4-step), **SeedVR2** upscaler (832×480→1872×1080; `tests/test_seedvr2_upscale.py`).
 
-## UPDATE 2026-06-01 — Video & motion arsenal added (see `docs/COMFYUI_MASTERPLAN.md`)
-Built out per the masterplan (4 phases) + a quality-upgrade pass. All live-tested.
-- **06 Wan 2.2 5B** text/image→video. **07 skeleton→character animation** (Fun-Control 5B + DWPose). **08 Wan-Animate full** (loadable; ViTPose+SAM2, deps installed).
-- **builders/storyboard_to_video.py** — boards shots → keyframes (Flux 2, consistent character) → i2v → assembled film.
-- **Quality upgrade:** Wan-Animate 14B (pose-only, `tests/test_wan_animate.py`, ~60s) and Wan 2.2 14B i2v (`tests/test_wan14b_i2v.py`, ~69s) both > 5B; lightx2v Lightning LoRA (4-step); SeedVR2 upscaler (832×480→1872×1080, `tests/test_seedvr2_upscale.py`).
-- Models added (~75 GB): wan2.2_ti2v_5B, wan2.2_fun_control_5B, Wan2_2-Animate-14B fp8, wan2.2_i2v high+low 14B fp8, Wan2_1_VAE_bf16, umt5, lightx2v + relight LoRAs; detection onnx (ViTPose/YOLO) in models/detection; SAM2 node pack cloned.
-- Gotchas: 14B i2v uses ModelSamplingSD3 **shift 5** + Wan2.1 VAE + no clip_vision; Wan-Animate DiffusionModelLoaderKJ must omit extra_state_dict, WanAnimateToVideo continue_motion_max_frames≥1; SAM2 segmentor=single_image for bboxes; run detection onnx on CPUExecutionProvider (installed onnxruntime is OpenVINO/CPU, no CUDA provider).
-- Work committed on branch **feat/video-motion-arsenal** (not yet merged to main / pushed).
+**Best-quality recipe:** character motion → `08` (Wan-Animate full); plain shots → Wan 2.2 14B i2v; 4-step via lightx2v; SeedVR2 to upscale finals; run video at 720p / 80+ frames / ~30 steps when not using lightx2v.
 
-## Decisions / things NOT to redo
-- **Cloudflare tunnel was REMOVED at user request** ("not working"). Do not re-add Cloudflare. If remote access comes up again, the agreed-on secure option is **Tailscale** (needs the user's login on PC + phone).
-- Flux 2 Klein is the user's hero model; don't suggest swapping the base generator.
-- Use the LOCAL sampling path, never the Flux2Pro/Max/Image API (cloud, paid) nodes.
+## Models added this round (~75 GB, all on disk)
+diffusion_models: `wan2.2_ti2v_5B_fp16`, `wan2.2_fun_control_5B_bf16`, `Wan2_2-Animate-14B_fp8_scaled_e4m3fn_KJ_v2`, `wan2.2_i2v_high_noise_14B_fp8_scaled`, `wan2.2_i2v_low_noise_14B_fp8_scaled` · vae: `wan2.2_vae`, `Wan2_1_VAE_bf16` · text_encoders: `umt5_xxl_fp8_e4m3fn_scaled` · loras: `lightx2v_I2V_14B_480p_..._rank64_bf16`, `WanAnimate_relight_lora_fp16` · models/detection: `vitpose_h_wholebody_model.onnx`+`.bin`, `yolov10m.onnx` · SAM2 auto-downloads (sam2.1_hiera_base_plus).
+Custom node added: `ComfyUI-segment-anything-2` (cloned). Everything else (WanVideoWrapper, WanAnimatePreprocess, GGUF, VHS, kjnodes, controlnet_aux, rmbg, sam3, TiledDiffusion, seedvr2, Trellis2) was already installed.
 
-## Critical wiring gotchas (these bit us — keep them)
-- **Qwen-Image-Edit (04):** REQUIRES `ModelSamplingAuraFlow`(3.1) + `CFGNorm`(1) on the model AND conditioning routed through `FluxKontextMultiReferenceLatentMethod`(index_timestep_zero). Without the ref-latent method it ignores the input image and outputs garbage. Reference graph: ComfyUI `blueprints/Image Edit (Qwen 2511).json`. Encoder `qwen_2.5_vl_7b_fp8_scaled` (type `qwen_image`), VAE `qwen_image_vae`. CFG 4, steps 20-40.
-- **Z-Image (03/05):** CLIPLoader type MUST be `lumina2`; CFG 1, steps 8, dpmpp_sde/beta; `ModelSamplingAuraFlow` shift 3. Reuses existing `qwen_3_4b` encoder + `ae.safetensors` VAE.
-- **Z-Image ControlNet (05):** Fun ControlNet lives in `models/model_patches`, loads via `ModelPatchLoader` + `ZImageFunControlnet` (patches the MODEL — NOT standard ControlNet nodes).
-- **Downloads:** verify HF file sizes — a truncated 5.0G-vs-6.4G controlnet caused a `shape invalid for input of size` reshape error. Resume with `curl -C -`.
+## Environment changes made (important)
+- **onnxruntime → onnxruntime-gpu only (1.26.0).** Removed conflicting `onnxruntime` + `onnxruntime-openvino` (OpenVINO was hijacking the import and hiding CUDA). ViTPose/YOLO now run on the 4080 (cuDNN9 supplied by torch/lib, which ComfyUI loads). If onnx ever falls back to CPU, re-check that only `onnxruntime-gpu` is installed.
+- ComfyUI was stopped/relaunched once to swap locked DLLs; it's back up and healthy.
 
-## Operational gotchas
-- Reach the local server from tools via proxy bypass: `curl.exe --noproxy "*" http://127.0.0.1:8188/...`
-- `object_info.json` is huge and PowerShell `ConvertFrom-Json` chokes on duplicate case-keys → parse with the embedded python. Refresh model lists by GET `/object_info/<NodeName>`.
-- Console is Greek cp1253 → set `PYTHONIOENCODING=utf-8` when printing unicode.
-- Test a workflow by POSTing API-format JSON to `/prompt`, poll `/history/<id>`, then VIEW the output image (see `tests/`).
+## Critical wiring gotchas (keep these)
+- **Wan-Animate full (08):** `DiffusionModelLoaderKJ` — omit `extra_state_dict`; `WanAnimateToVideo` `continue_motion_max_frames` ≥ 1; ONNX `onnx_device=CUDAExecutionProvider`; SAM2 needs a **2.1 model + `segmentor=video`** to accept bboxes (2.0/single_image → bbox IndexError). 4-step LCM: CFGGuider cfg 1 + BasicScheduler simple/4 + KSamplerSelect lcm.
+- **Wan 2.2 14B i2v:** `WanImageToVideo` (NO clip_vision), `ModelSamplingSD3` **shift 5**, `Wan2_1_VAE_bf16`, dual-expert two-stage `KSamplerAdvanced` (high steps 0-2 leftover-noise on, low 2-4) + lightx2v, CFG 1, euler/simple.
+- **Wan 2.2 5B (06/07):** `ModelSamplingSD3` shift 8, CLIPLoader type `wan`, `wan2.2_vae`. 5B i2v = `Wan22ImageToVideoLatent`; Fun-Control = `Wan22FunControlToVideo` (ref_image + control_video from DWPose).
+- **pip on this embedded python:** set `TEMP`/`TMP` to the **F:** drive (cross-drive move = WinError 17); ComfyUI must be **stopped** to replace locked DLLs (kill PID on :8188, relaunch `python_embeded\python.exe -s ComfyUI/main.py --windows-standalone-build --use-flash-attention`).
+- (Earlier, unchanged) Qwen-Edit ref-latent-method; Z-Image CLIP type `lumina2`; verify HF download sizes (`curl -C -`); reach server via `curl.exe --noproxy "*"`; parse object_info with embedded python; `PYTHONIOENCODING=utf-8`.
 
-## How to continue / regenerate
-- Regenerate Flux 2 workflow: `python_embeded/python.exe builders/gen_workflow.py` → writes `workflows/01_...json`.
-- Rebuild master: `... builders/merge_master.py` (reads the installed 01-05, writes `workflows/00_...json`).
-- Inject a 4K branch into any workflow: `... builders/add_4k_upscale.py in.json out.json PREFIX`.
-- After regenerating, copy the file into ComfyUI's `user/default/workflows/` to install.
+## Decisions / do NOT redo
+- Cloudflare stays removed (Tailscale is the agreed remote-access option if it ever comes up).
+- Flux 2 Klein is the hero stills model; never the paid cloud API nodes.
+- Character consistency = Flux 2 native `ReferenceLatent` (workflows 01); do NOT install SDXL-era IPAdapter/PuLID (quality regression).
 
-## Open items / possible next steps (none blocking)
-1. **Remote access** — not set up. Recommend Tailscale (private VPN) when the user is at the machine to log in. (Cloudflare is off-limits per their call.)
-2. **LoRA support** — add a `Power Lora Loader (rgthree)` to the Flux 2 / Z-Image workflows (user has no LoRAs yet).
-3. **Auto image→prompt→image** — wire `02` (Qwen3-VL caption) output into `01`/`03` prompt for one-click "describe a reference then generate".
-4. **ControlNet tuning** — try the `Union-2.1-8steps` variant (better suited to Z-Image's 8-step turbo) vs the base 2.1 we installed.
-5. **CREATIVE_OS** — offered a structure/quality pass; user hasn't taken it up.
+## Open / possible next steps (none blocking)
+1. **Loadable WF for 06/07/14B-i2v** — only `08` and the templates are loadable; the 14B-i2v + pose-only paths exist as tested scripts. Could ship UI workflows.
+2. **storyboard_to_video.py upgrades** — add a `"mode":"skeleton"`/`"animate"` branch to route shots through `07`/`08`; option to use Wan 14B i2v instead of 5B; auto-SeedVR2 finishing pass.
+3. **Master workflow refresh** — `00_MASTER` predates the video work; could fold in 06/07/08.
+4. **Test artifacts** left in ComfyUI input/output (CHAR_*, WAN_*, SEEDVR2_*, char_*, seedvr_src.mp4) — harmless, can be cleared.
+5. Older backlog: LoRA loader in stills workflows; auto image→prompt→image (WF 02 → 01/03); ControlNet Union-2.1-8steps; CREATIVE_OS pass.
 
 ## Memory
-Persistent notes for this project live in `C:\Users\User\.claude\projects\F--APPS-COMFYUI-HELPER\memory\` (setup-comfyui-flux2, flux2-workflow-design, local-image-stack). Update them as things change.
+Persistent notes in `C:\Users\User\.claude\projects\F--APPS-COMFYUI-HELPER\memory\`: user-profile, project-motion-arsenal, wan-video-foundation, character-consistency, skeleton-animation, storyboard-to-video, wan-animate-14b, + the original setup/flux2/local-stack notes. Update them as things change.
