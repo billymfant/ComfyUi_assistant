@@ -29,11 +29,11 @@ p = {
  # ---- driving video ----
  "30": {"class_type": "VHS_LoadVideo", "inputs": {"video": DRIVE, "force_rate": FPS, "custom_width": W, "custom_height": H, "frame_load_cap": LEN, "skip_first_frames": 0, "select_every_nth": 1}},
  # ---- ONNX pose + face detection (CPU) ----
- "31": {"class_type": "OnnxDetectionModelLoader", "inputs": {"vitpose_model": "vitpose_h_wholebody_model.onnx", "yolo_model": "yolov10m.onnx", "onnx_device": "CPUExecutionProvider"}},
+ "31": {"class_type": "OnnxDetectionModelLoader", "inputs": {"vitpose_model": "vitpose_h_wholebody_model.onnx", "yolo_model": "yolov10m.onnx", "onnx_device": "CUDAExecutionProvider"}},
  "32": {"class_type": "PoseAndFaceDetection", "inputs": {"model": ["31", 0], "images": ["30", 0], "width": W, "height": H}},
  "33": {"class_type": "DrawViTPose", "inputs": {"pose_data": ["32", 0], "width": W, "height": H, "retarget_padding": 0, "body_stick_width": 4, "hand_stick_width": 2, "draw_head": True}},
  # ---- SAM2 character mask ----
- "40": {"class_type": "DownloadAndLoadSAM2Model", "inputs": {"model": "sam2_hiera_base_plus.safetensors", "segmentor": "single_image", "device": "cuda", "precision": "fp16"}},
+ "40": {"class_type": "DownloadAndLoadSAM2Model", "inputs": {"model": "sam2.1_hiera_base_plus.safetensors", "segmentor": "video", "device": "cuda", "precision": "fp16"}},
  "41": {"class_type": "Sam2Segmentation", "inputs": {"sam2_model": ["40", 0], "image": ["30", 0], "keep_model_loaded": False, "bboxes": ["32", 3]}},
  "42": {"class_type": "GrowMaskWithBlur", "inputs": {"mask": ["41", 0], "expand": 10, "incremental_expandrate": 0.0, "tapered_corners": True, "flip_input": False, "blur_radius": 0.0, "lerp_alpha": 1.0, "decay_factor": 1.0}},
  "43": {"class_type": "BlockifyMask", "inputs": {"masks": ["42", 0], "block_size": 32}},

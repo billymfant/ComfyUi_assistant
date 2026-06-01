@@ -1035,7 +1035,7 @@
       "widgets_values": [
         "vitpose_h_wholebody_model.onnx",
         "yolov10m.onnx",
-        "CPUExecutionProvider"
+        "CUDAExecutionProvider"
       ]
     },
     {
@@ -1773,8 +1773,8 @@
         "Node name for S&R": "DownloadAndLoadSAM2Model"
       },
       "widgets_values": [
-        "sam2_hiera_base_plus.safetensors",
-        "single_image",
+        "sam2.1_hiera_base_plus.safetensors",
+        "video",
         "cuda",
         "fp16"
       ]
