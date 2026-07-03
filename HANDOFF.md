@@ -2,15 +2,19 @@
 
 _Last updated: 2026-07-03. Read `CLAUDE.md` for technical reference, `docs/COMFYUI_MASTERPLAN.md` for the motion-arsenal plan, `3dmodeling assistant plan.md` + `docs/superpowers/specs/2026-07-03-asset-factory-design.md` for the 3D-assistant line of work. This file is the "where we are / what's next" summary._
 
-## NEXT SESSION (written 2026-07-03, context ran out at 98%)
-**State: everything works.** Asset Factory (wf 12+13) shipped, live-tested, committed & pushed (`ab45587`). Both Trellis2-GGUF local patches applied + verified (see LOCAL PATCHES below); server was left running the fixed code. User's mask run diagnosed: bad results came from the concept image (lying flat, dead-front) — concept-image rules are in README/memory (`asset-factory.md`).
+## NEXT SESSION (written 2026-07-04)
+**State: everything works.** Wf 13 QUALITY UPGRADE shipped, live-tested end-to-end (28:37 cold), committed & pushed (`59949ed`). User's complaint "ortho views degrade vs concept + 3D messy" fixed with three changes (all in `builders/gen_asset_factory.py`, details in memory `asset-factory.md`):
+1. New **G2b VIEW ENHANCE**: MV views → 4x-UltraSharp → 1024 → Flux2 img2img denoise 0.30 (SplitSigmasDenoise low_sigmas), conditioned on the user's ASSET PROMPT — dramatic detail recovery, silhouettes intact.
+2. **Trellis front_image = the original concept image** (own rembg prep); MV-Adapter only supplies back/left/right.
+3. Trellis at pack-author reference settings: **25 steps ×3, rescale 0.2, blend_temp 2.0, GGUF Q8_0, 4096 bake** (Q5/Q8 GGUFs were already on disk). Verified output: 204,873 faces, 4096² PBR ×2, `output/3D/13_ASSET_FACTORY_00003_.glb`.
+Visual before/after report (artifact): https://claude.ai/code/artifact/353cae91-d85d-4973-a854-c2dd4e9c03f1
 
-**Agreed next task — "Ask Claude" custom node (user said "we talk about it", NOT yet approved to build):**
-- Plan: `custom_nodes/comfyui_claude` pack with an **Ask Claude** node → runs Claude Code headless (`claude -p`, cwd=F:\APPS\COMFYUI_HELPER so it has project context/memory) → STRING output. Modes: `chat` (Q&A) and `prompt` (rough idea → polished Flux2/asset prompt for CLIPTextEncode). Optional `--resume <session-id>` for multi-turn. Costs nothing (subscription).
-- Open decision for user: add a 2nd backend using the Anthropic API (`anthropic` SDK, model `claude-opus-4-8`, needs paid API key) for fast in-graph vision loops (image critique → prompt rewrite). User hadn't answered yet.
-- Ask the user "build it?" then implement. After that: phase-2 `make_asset.py`, then revisit parked ideas B (Blender addon) + D (char pipeline) — see memory `parked-ideas-blender.md`.
+**Next steps:**
+- **User judges the new mesh in Blender.** If geometry still messy on a real asset: next lever = `1536_cascade` pipeline_type (slower, finer voxels), then dual_contouring 2048.
+- **"Ask Claude" custom node — still pending user approval** (plan unchanged): `custom_nodes/comfyui_claude`, runs `claude -p` headless (cwd=this repo), `chat` + `prompt` modes, STRING out; open decision: optional 2nd Anthropic-API backend for in-graph vision loops.
+- Then phase-2 `make_asset.py`, then parked ideas B/D (`parked-ideas-blender.md`).
 
-Loose ends: `workflows/09_LTX2_i2v_glitch.json` duplicated at root and in `Video/` (structurally identical — ask which to keep); `.server_log.txt` untracked (gitignore?).
+Loose ends: `workflows/09_LTX2_i2v_glitch.json` duplicated at root and in `Video/` (ask which to keep); `.server_log.txt` untracked (gitignore?); claude-in-chrome extension can't load 127.0.0.1:8188 (error page — user must grant the extension site access to localhost before I can drive the ComfyUI UI visually; API route works fine). `tests/run_ui_workflow.py` now takes optional timeout seconds as argv[2].
 
 ## NEWEST: Asset Factory (2026-07-03) — direction chosen + shipped
 Brainstormed ComfyUI+Blender direction with the user. **Chosen: ComfyUI = asset BUILDER** (characters/props/set pieces at "clean-up-friendly" tier: ~200k faces, holes filled, Xatlas UVs, 2048 baked PBR); the user assembles/animates by hand in Blender. Parked in memory for later: AI finishing pass on Blender renders (A), Blender addon bridge (B), rigged character pipeline (D) — see `parked-ideas-blender.md` memory; user wants B/D revisited after this ships.
