@@ -1,0 +1,77 @@
+Analyze my ComfyUI custom_nodes directory and the LTX 2.3 
+node pack I have installed. I want to build a custom node 
+pack that replicates a glitchcore time-slicing effect — 
+where video frames are divided into a grid and tiles are 
+staggered/offset across time to create a mosaic transition 
+effect, plus a separate node that composites floating 
+graphic overlay elements (colored rectangles, code 
+snippets) onto video frames.
+
+Please:
+1. Scan the existing custom_nodes folder structure and 
+   identify how LTX nodes are built — their INPUT_TYPES, 
+   tensor shapes, and RETURN_TYPES
+2. Identify the ComfyUI version and any relevant 
+   dependencies already available
+3. Propose a node pack architecture with at minimum:
+   - A TimeSliceGrid node (splits frames into NxN tiles, 
+     offsets each tile by a staggered time value)
+   - A GlitchOverlay node (composites procedural graphic 
+     elements onto the frame batch)
+4. Scaffold the __init__.py and nodes.py with correct 
+   class structure, INPUT_TYPES, and placeholder logic 
+   ready for me to fill in
+5. Flag any tensor shape assumptions that need confirming 
+   before the logic will work correctly
+
+and give me an analysis 
+
+
+Here's a breakdown of what Claude Code will likely find and what to expect:
+What Your Setup Probably Looks Like
+LTX 2.3 outputs video as batched IMAGE tensors — shape (frames, H, W, 3) — so your custom nodes slot directly into the pipeline without needing a separate video type. That's the good news; you're working with standard ComfyUI IMAGE format throughout.
+
+The Two Nodes — What They Actually Need to Do
+TimeSliceGrid Node
+The core idea is: divide each frame into an NxN grid, then for each tile, pull its content from a different point in time rather than the current frame. The offset per tile creates the mosaic/shatter effect.
+Frame 10 displayed, but:
+  Tile [0,0] → pulled from frame 8
+  Tile [0,1] → pulled from frame 11
+  Tile [1,0] → pulled from frame 7
+  Tile [1,1] → pulled from frame 13
+The stagger pattern (random, radial, linear) controls the aesthetic. This is computationally light — it's just tensor indexing, no model inference.
+Inputs you'll want:
+
+images (IMAGE) — full frame batch from LTX
+grid_size (INT) — NxN, probably 4–16
+time_offset_range (INT) — how many frames ahead/behind to pull from
+stagger_pattern (STRING) — random, radial, linear
+seed (INT) — for reproducible randomness
+
+
+GlitchOverlay Node
+This composites procedural graphic elements onto frames — colored rectangles, thin bars, pseudo-code text fragments. The key is making them feel like data artifacts, not decorations. They should flicker — appearing on some frames and not others — with slight positional drift.
+Inputs you'll want:
+
+images (IMAGE)
+element_count (INT) — how many artifacts per frame
+flicker_rate (FLOAT) — probability an element appears on any given frame
+color_palette (STRING) — neon, monochrome, data
+seed (INT)
+
+
+Architectural Risks Claude Code Will Likely Flag
+Tensor boundary clamping — when a tile tries to pull from frame -2 or frame N+5, you need to clamp or mirror. Easy fix but easy to miss initially.
+LTX frame count — LTX 2.3 generates fixed-length clips. If your grid offset range exceeds the clip length, tiles will hit empty indices. Claude Code should catch this once it reads the LTX node outputs.
+Batch vs single frame — some nodes in ComfyUI pass single frames (1, H, W, 3) rather than the full batch. Your nodes need to handle both or explicitly document which they expect.
+Text rendering for overlay — PIL/Pillow is available in ComfyUI's environment for drawing text and shapes. You'll need to convert tensors → PIL → back to tensor for the overlay compositing step. Claude Code should scaffold that conversion.
+
+Expected Output from Claude Code
+After running that prompt you should get back:
+
+A confirmed read of your LTX node tensor shapes
+A custom_nodes/glitch_pack/ folder with __init__.py and nodes.py scaffolded
+Placeholder process() functions with the right signatures
+A short list of assumptions it made that you need to verify before running
+
+From there it's iterative — get the nodes loading first, then fill in the actual tensor math. The scaffolding pass is the part Claude Code does best.
