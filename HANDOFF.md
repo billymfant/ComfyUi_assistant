@@ -1,6 +1,16 @@
 # HANDOFF — COMFYUI_HELPER
 
-_Last updated: 2026-06-01. Read `CLAUDE.md` for technical reference and `docs/COMFYUI_MASTERPLAN.md` for the full motion-arsenal plan + every model/setting/gotcha. This file is the "where we are / what's next" summary._
+_Last updated: 2026-07-03. Read `CLAUDE.md` for technical reference, `docs/COMFYUI_MASTERPLAN.md` for the motion-arsenal plan, `3dmodeling assistant plan.md` + `docs/superpowers/specs/2026-07-03-asset-factory-design.md` for the 3D-assistant line of work. This file is the "where we are / what's next" summary._
+
+## NEWEST: Asset Factory (2026-07-03) — direction chosen + shipped
+Brainstormed ComfyUI+Blender direction with the user. **Chosen: ComfyUI = asset BUILDER** (characters/props/set pieces at "clean-up-friendly" tier: ~200k faces, holes filled, Xatlas UVs, 2048 baked PBR); the user assembles/animates by hand in Blender. Parked in memory for later: AI finishing pass on Blender renders (A), Blender addon bridge (B), rigged character pipeline (D) — see `parked-ideas-blender.md` memory; user wants B/D revisited after this ships.
+
+Shipped & live-tested (in `workflows/3d modeling helper/` + installed):
+- **12_TRELLIS_TEXTURED** — single image → textured .glb. Validated: Kiwano char → 189,570 faces, UVs, 2048² baseColor+metallicRoughness, 425s cold. (`builders/gen_trellis_textured.py`)
+- **13_ASSET_FACTORY** — the master: G1 CONCEPT (Flux2 t2i + optional ref, active) → G2 MULTIVIEW (MV-Adapter 4 ortho views, bypassed) → G3 TRELLIS 3D (multiview generator → PostProcess/UnwrapRasterizer → glb, bypassed). "Press play" UX: iterate G1 (seed control **fixed** so the concept stays cached), then Ctrl+B groups 2+3 and Run. (`builders/gen_asset_factory.py`)
+- Fixed en route: **frontend adds a control_after_generate widget to ANY INT input named `seed`** (name-based fallback confirmed in frontend 1.43.18 source) → UI workflows must serialize the "fixed" token after seed values. wf 11 had it missing (widgets displayed shifted) — regenerated. `tests/run_ui_workflow.py` now skips control tokens AND resolves links through bypassed nodes (UI passthrough semantics).
+- **LOCAL PATCH to ComfyUI-Trellis2-GGUF** (user-approved, re-apply if the pack updates): `nodes.py`, class `Trellis2_GGUFPostProcessAndUnWrapAndRasterizer` — the author forgot `out_faces_int32 = out_faces.to(torch.int32)` when duplicating the rasterize block (single-image path has it at ~line 1218; multiview tail used it undefined at ~line 1956 → NameError). One line added before `print("Sampling attributes...")`. Worth PRing upstream.
+- Phase 2 (NOT started): `builders/make_asset.py` one-command driver + `--type` presets — do after the user has driven wf 13 and is happy with defaults.
 
 ## What this project is
 A helper repo for building & testing local ComfyUI workflows for the user (billymfant) — a **creative director / motion + graphic designer**. Goal: a 100% local, free ComfyUI arsenal that produces **all the assets a motion-graphics project needs** (stills, consistent characters, video, character animation, assembled films), replacing paid generators. The ComfyUI install lives at `F:\ComfyUI\ComfyUI-Easy-Install` (server http://127.0.0.1:8188); this repo holds the workflow JSONs + tooling.

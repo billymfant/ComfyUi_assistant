@@ -1,0 +1,727 @@
+{
+  "id": "trellis-textured",
+  "revision": 0,
+  "last_node_id": 100,
+  "last_link_id": 13,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "Trellis2LoadImageWithTransparency_GGUF",
+      "pos": [
+        40,
+        60
+      ],
+      "size": [
+        320,
+        340
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 0
+        },
+        {
+          "name": "mask",
+          "type": "MASK",
+          "links": [],
+          "slot_index": 1
+        },
+        {
+          "name": "image_with_alpha",
+          "type": "IMAGE",
+          "links": [
+            1
+          ],
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2LoadImageWithTransparency_GGUF"
+      },
+      "widgets_values": [
+        "example.png",
+        "image"
+      ],
+      "title": "Input image (subject on plain/transparent bg)"
+    },
+    {
+      "id": 2,
+      "type": "Trellis2PreProcessImage_GGUF",
+      "pos": [
+        40,
+        460
+      ],
+      "size": [
+        300,
+        90
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            3,
+            9
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2PreProcessImage_GGUF"
+      },
+      "widgets_values": [
+        0,
+        false
+      ]
+    },
+    {
+      "id": 3,
+      "type": "Trellis2LoadModel_GGUF",
+      "pos": [
+        40,
+        610
+      ],
+      "size": [
+        320,
+        180
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "pipeline",
+          "type": "TRELLIS2PIPELINE",
+          "links": [
+            2,
+            8
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2LoadModel_GGUF"
+      },
+      "widgets_values": [
+        "TRELLIS.2-4B",
+        "GGUF Q4_K_M",
+        "flash_attn",
+        "cuda",
+        true,
+        true
+      ]
+    },
+    {
+      "id": 4,
+      "type": "Trellis2MeshWithVoxelAdvancedGenerator_GGUF",
+      "pos": [
+        420,
+        60
+      ],
+      "size": [
+        360,
+        720
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pipeline",
+          "type": "TRELLIS2PIPELINE",
+          "link": 2
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "links": [
+            4
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "bvh",
+          "type": "BVH",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2MeshWithVoxelAdvancedGenerator_GGUF"
+      },
+      "widgets_values": [
+        12345,
+        "fixed",
+        "1024_cascade",
+        12,
+        6.5,
+        0.05,
+        4.0,
+        12,
+        6.5,
+        0.05,
+        4.0,
+        12,
+        3.0,
+        0.2,
+        3.0,
+        49152,
+        4,
+        32,
+        true,
+        0.1,
+        1.0,
+        0.1,
+        1.0,
+        0.0,
+        0.9,
+        true,
+        "euler",
+        "euler",
+        "euler"
+      ],
+      "title": "Trellis generator"
+    },
+    {
+      "id": 5,
+      "type": "Trellis2Remesh_GGUF",
+      "pos": [
+        820,
+        60
+      ],
+      "size": [
+        300,
+        160
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "links": [
+            5
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2Remesh_GGUF"
+      },
+      "widgets_values": [
+        1.0,
+        0.0,
+        "Auto",
+        true,
+        true
+      ]
+    },
+    {
+      "id": 6,
+      "type": "Trellis2SimplifyMesh_GGUF",
+      "pos": [
+        820,
+        280
+      ],
+      "size": [
+        300,
+        100
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "links": [
+            6
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2SimplifyMesh_GGUF"
+      },
+      "widgets_values": [
+        200000,
+        "Cumesh"
+      ],
+      "title": "Simplify (200k = clean-up-friendly)"
+    },
+    {
+      "id": 7,
+      "type": "Trellis2FillHolesWithMeshlib_GGUF",
+      "pos": [
+        820,
+        440
+      ],
+      "size": [
+        300,
+        70
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "link": 6
+        }
+      ],
+      "outputs": [
+        {
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "links": [
+            7
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "holes_filled",
+          "type": "INT",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2FillHolesWithMeshlib_GGUF"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 8,
+      "type": "Trellis2MeshWithVoxelToTrimesh_GGUF",
+      "pos": [
+        820,
+        570
+      ],
+      "size": [
+        300,
+        90
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "link": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "trimesh",
+          "type": "TRIMESH",
+          "links": [
+            10
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2MeshWithVoxelToTrimesh_GGUF"
+      },
+      "widgets_values": [
+        "90 degrees"
+      ]
+    },
+    {
+      "id": 9,
+      "type": "Trellis2MeshTexturing_GGUF",
+      "pos": [
+        1160,
+        60
+      ],
+      "size": [
+        360,
+        680
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "pipeline",
+          "type": "TRELLIS2PIPELINE",
+          "link": 8
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 9
+        },
+        {
+          "name": "trimesh",
+          "type": "TRIMESH",
+          "link": 10
+        }
+      ],
+      "outputs": [
+        {
+          "name": "trimesh",
+          "type": "TRIMESH",
+          "links": [
+            11
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "base_color_texture",
+          "type": "IMAGE",
+          "links": [
+            13
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "metallic_roughness_texture",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2MeshTexturing_GGUF"
+      },
+      "widgets_values": [
+        0,
+        "fixed",
+        12,
+        3.0,
+        0.2,
+        3.0,
+        1024,
+        2048,
+        "OPAQUE",
+        false,
+        0.0,
+        0.9,
+        4,
+        false,
+        false,
+        "Xatlas",
+        60.0,
+        false,
+        512,
+        24,
+        false,
+        120,
+        48,
+        "euler"
+      ],
+      "title": "Texturing (Xatlas \u2014 only working uv method)"
+    },
+    {
+      "id": 10,
+      "type": "Trellis2ExportMesh_GGUF",
+      "pos": [
+        1560,
+        60
+      ],
+      "size": [
+        300,
+        110
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "trimesh",
+          "type": "TRIMESH",
+          "link": 11
+        }
+      ],
+      "outputs": [
+        {
+          "name": "glb_path",
+          "type": "STRING",
+          "links": [
+            12
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2ExportMesh_GGUF"
+      },
+      "widgets_values": [
+        "3D/12_TRELLIS_TEXTURED",
+        "glb"
+      ]
+    },
+    {
+      "id": 11,
+      "type": "Preview3D",
+      "pos": [
+        1560,
+        230
+      ],
+      "size": [
+        420,
+        450
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "camera_info",
+          "type": "LOAD3D_CAMERA",
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "bg_image",
+          "type": "IMAGE",
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "model_file",
+          "type": "STRING,FILE_3D_GLB,FILE_3D_GLTF,FILE_3D_FBX,FILE_3D_OBJ,FILE_3D_STL,FILE_3D_USDZ,FILE_3D",
+          "link": 12,
+          "widget": {
+            "name": "model_file"
+          }
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "Preview3D"
+      },
+      "widgets_values": [
+        "",
+        ""
+      ]
+    },
+    {
+      "id": 12,
+      "type": "PreviewImage",
+      "pos": [
+        1560,
+        740
+      ],
+      "size": [
+        300,
+        270
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 13
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": [],
+      "title": "Baked base-color texture"
+    },
+    {
+      "id": 99,
+      "type": "Note",
+      "pos": [
+        40,
+        860
+      ],
+      "size": [
+        340,
+        300
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "Note"
+      },
+      "widgets_values": [
+        "12 - TRELLIS TEXTURED  (single image -> textured 3D asset)\n\n1. Put your concept image (subject on plain or transparent background,\n   e.g. from workflow 01) in ComfyUI/input and pick it in the loader.\n2. Run. Output: output/3D/12_TRELLIS_TEXTURED_*.glb with UVs + baked texture.\n\nDefaults = the validated recipe: 200,000 faces, Xatlas unwrap, 2048 texture\n(~2 min on the 4080S). More detail: SimplifyMesh 500k-2M (slower to unwrap).\nSharper texture: texture_size 4096. Q5_K_M in LoadModel = a bit better, slower.\nFor a better mesh from 4 views, use 13_ASSET_FACTORY instead."
+      ],
+      "color": "#432",
+      "bgcolor": "#432"
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      2,
+      2,
+      0,
+      "IMAGE"
+    ],
+    [
+      2,
+      3,
+      0,
+      4,
+      0,
+      "TRELLIS2PIPELINE"
+    ],
+    [
+      3,
+      2,
+      0,
+      4,
+      1,
+      "IMAGE"
+    ],
+    [
+      4,
+      4,
+      0,
+      5,
+      0,
+      "MESHWITHVOXEL"
+    ],
+    [
+      5,
+      5,
+      0,
+      6,
+      0,
+      "MESHWITHVOXEL"
+    ],
+    [
+      6,
+      6,
+      0,
+      7,
+      0,
+      "MESHWITHVOXEL"
+    ],
+    [
+      7,
+      7,
+      0,
+      8,
+      0,
+      "MESHWITHVOXEL"
+    ],
+    [
+      8,
+      3,
+      0,
+      9,
+      0,
+      "TRELLIS2PIPELINE"
+    ],
+    [
+      9,
+      2,
+      0,
+      9,
+      1,
+      "IMAGE"
+    ],
+    [
+      10,
+      8,
+      0,
+      9,
+      2,
+      "TRIMESH"
+    ],
+    [
+      11,
+      9,
+      0,
+      10,
+      0,
+      "TRIMESH"
+    ],
+    [
+      12,
+      10,
+      0,
+      11,
+      2,
+      "STRING"
+    ],
+    [
+      13,
+      9,
+      1,
+      12,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "TRELLIS TEXTURED \u2014 image -> textured .glb (Xatlas, 200k)",
+      "bounding": [
+        20,
+        0,
+        1980,
+        1180
+      ],
+      "color": "#3f5f9e",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.7,
+      "offset": [
+        400,
+        300
+      ]
+    }
+  },
+  "version": 0.4
+}

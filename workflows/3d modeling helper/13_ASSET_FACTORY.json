@@ -1,0 +1,2149 @@
+{
+  "id": "asset-factory",
+  "revision": 0,
+  "last_node_id": 100,
+  "last_link_id": 45,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "UNETLoader",
+      "pos": [
+        40,
+        80
+      ],
+      "size": [
+        300,
+        82
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            1
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "flux-2-klein-4b-fp8.safetensors",
+        "default"
+      ],
+      "title": "Diffusion Model (4B=fast / 9B=quality)"
+    },
+    {
+      "id": 2,
+      "type": "CLIPLoader",
+      "pos": [
+        40,
+        220
+      ],
+      "size": [
+        300,
+        106
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            2
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "qwen_3_4b.safetensors",
+        "flux2",
+        "default"
+      ],
+      "title": "Text Encoder (Qwen3)"
+    },
+    {
+      "id": 3,
+      "type": "VAELoader",
+      "pos": [
+        40,
+        380
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            7,
+            16
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "flux2-vae.safetensors"
+      ],
+      "title": "VAE"
+    },
+    {
+      "id": 4,
+      "type": "CLIPTextEncode",
+      "pos": [
+        380,
+        80
+      ],
+      "size": [
+        380,
+        220
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            3
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "a stylized fantasy treasure chest with brass fittings, clean 3d asset concept art, single object centered, neutral gray studio background, soft even lighting, full object in frame"
+      ],
+      "title": "ASSET PROMPT",
+      "color": "#232",
+      "bgcolor": "#232"
+    },
+    {
+      "id": 5,
+      "type": "FluxGuidance",
+      "pos": [
+        380,
+        350
+      ],
+      "size": [
+        380,
+        58
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            4
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FluxGuidance"
+      },
+      "widgets_values": [
+        4
+      ],
+      "title": "Guidance (3-5)"
+    },
+    {
+      "id": 30,
+      "type": "LoadImage",
+      "pos": [
+        380,
+        480
+      ],
+      "size": [
+        300,
+        314
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            5
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "example.png",
+        "image"
+      ],
+      "title": "Reference image",
+      "color": "#322",
+      "bgcolor": "#322"
+    },
+    {
+      "id": 31,
+      "type": "ImageScaleToTotalPixels",
+      "pos": [
+        380,
+        850
+      ],
+      "size": [
+        280,
+        106
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            6
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageScaleToTotalPixels"
+      },
+      "widgets_values": [
+        "lanczos",
+        1.0,
+        16
+      ]
+    },
+    {
+      "id": 32,
+      "type": "VAEEncode",
+      "pos": [
+        380,
+        1000
+      ],
+      "size": [
+        210,
+        46
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "pixels",
+          "type": "IMAGE",
+          "link": 6
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            8
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEEncode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 33,
+      "type": "ReferenceLatent",
+      "pos": [
+        380,
+        1090
+      ],
+      "size": [
+        210,
+        66
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 4
+        },
+        {
+          "name": "latent",
+          "type": "LATENT",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            9
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ReferenceLatent"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 6,
+      "type": "EmptyFlux2LatentImage",
+      "pos": [
+        800,
+        80
+      ],
+      "size": [
+        280,
+        106
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            14
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyFlux2LatentImage"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1
+      ],
+      "title": "Canvas size"
+    },
+    {
+      "id": 7,
+      "type": "RandomNoise",
+      "pos": [
+        800,
+        230
+      ],
+      "size": [
+        280,
+        82
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "NOISE",
+          "type": "NOISE",
+          "links": [
+            10
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "RandomNoise"
+      },
+      "widgets_values": [
+        12345,
+        "fixed"
+      ],
+      "title": "Seed (fixed = 3D stages reuse the cached concept)"
+    },
+    {
+      "id": 8,
+      "type": "KSamplerSelect",
+      "pos": [
+        800,
+        360
+      ],
+      "size": [
+        280,
+        58
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SAMPLER",
+          "type": "SAMPLER",
+          "links": [
+            12
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSamplerSelect"
+      },
+      "widgets_values": [
+        "euler"
+      ]
+    },
+    {
+      "id": 9,
+      "type": "Flux2Scheduler",
+      "pos": [
+        800,
+        460
+      ],
+      "size": [
+        280,
+        82
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": [
+            13
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Flux2Scheduler"
+      },
+      "widgets_values": [
+        20,
+        1024,
+        1024
+      ],
+      "title": "Scheduler (steps)"
+    },
+    {
+      "id": 10,
+      "type": "BasicGuider",
+      "pos": [
+        800,
+        590
+      ],
+      "size": [
+        280,
+        46
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 1
+        },
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 9
+        }
+      ],
+      "outputs": [
+        {
+          "name": "GUIDER",
+          "type": "GUIDER",
+          "links": [
+            11
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "BasicGuider"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 11,
+      "type": "SamplerCustomAdvanced",
+      "pos": [
+        1120,
+        80
+      ],
+      "size": [
+        300,
+        150
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "noise",
+          "type": "NOISE",
+          "link": 10
+        },
+        {
+          "name": "guider",
+          "type": "GUIDER",
+          "link": 11
+        },
+        {
+          "name": "sampler",
+          "type": "SAMPLER",
+          "link": 12
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 13
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 14
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "LATENT",
+          "links": [
+            15
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "denoised_output",
+          "type": "LATENT",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SamplerCustomAdvanced"
+      },
+      "widgets_values": [],
+      "title": "Sampler"
+    },
+    {
+      "id": 12,
+      "type": "VAEDecode",
+      "pos": [
+        1120,
+        290
+      ],
+      "size": [
+        210,
+        46
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 15
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 16
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            17,
+            19
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 13,
+      "type": "SaveImage",
+      "pos": [
+        1120,
+        390
+      ],
+      "size": [
+        400,
+        440
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 17
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ASSET_CONCEPT"
+      ],
+      "title": "CONCEPT \u2014 iterate until you love it"
+    },
+    {
+      "id": 20,
+      "type": "BiRefNet",
+      "pos": [
+        1650,
+        80
+      ],
+      "size": [
+        300,
+        58
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "FUNCTION",
+          "type": "FUNCTION",
+          "links": [
+            18
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "BiRefNet"
+      },
+      "widgets_values": [
+        "ZhengPeng7/BiRefNet"
+      ],
+      "title": "BG removal (NOT briaai \u2014 gated)"
+    },
+    {
+      "id": 21,
+      "type": "ImagePreprocessor",
+      "pos": [
+        1650,
+        190
+      ],
+      "size": [
+        300,
+        106
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "remove_bg_fn",
+          "type": "FUNCTION",
+          "link": 18
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 19
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            25
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImagePreprocessor"
+      },
+      "widgets_values": [
+        768,
+        768
+      ]
+    },
+    {
+      "id": 22,
+      "type": "LdmPipelineLoader",
+      "pos": [
+        1650,
+        350
+      ],
+      "size": [
+        300,
+        106
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "PIPELINE",
+          "type": "PIPELINE",
+          "links": [
+            20,
+            21
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "AUTOENCODER",
+          "type": "AUTOENCODER",
+          "links": [],
+          "slot_index": 1
+        },
+        {
+          "name": "SCHEDULER",
+          "type": "SCHEDULER",
+          "links": [],
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LdmPipelineLoader"
+      },
+      "widgets_values": [
+        "sd_xl_base_1.0.safetensors",
+        "MVAdapterI2MVSDXLPipeline"
+      ]
+    },
+    {
+      "id": 23,
+      "type": "DiffusersMVSchedulerLoader",
+      "pos": [
+        1650,
+        510
+      ],
+      "size": [
+        300,
+        130
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "pipeline",
+          "type": "PIPELINE",
+          "link": 20
+        }
+      ],
+      "outputs": [
+        {
+          "name": "SCHEDULER",
+          "type": "SCHEDULER",
+          "links": [
+            22
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "DiffusersMVSchedulerLoader"
+      },
+      "widgets_values": [
+        "DDPM",
+        true,
+        "interpolated",
+        8.0
+      ]
+    },
+    {
+      "id": 24,
+      "type": "LdmVaeLoader",
+      "pos": [
+        1650,
+        690
+      ],
+      "size": [
+        300,
+        82
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUTOENCODER",
+          "type": "AUTOENCODER",
+          "links": [
+            23
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LdmVaeLoader"
+      },
+      "widgets_values": [
+        "sdxl_vae.safetensors",
+        true
+      ],
+      "title": "SDXL VAE (fp16 fix)"
+    },
+    {
+      "id": 25,
+      "type": "DiffusersMVModelMakeup",
+      "pos": [
+        2000,
+        80
+      ],
+      "size": [
+        320,
+        180
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "pipeline",
+          "type": "PIPELINE",
+          "link": 21
+        },
+        {
+          "name": "scheduler",
+          "type": "SCHEDULER",
+          "link": 22
+        },
+        {
+          "name": "autoencoder",
+          "type": "AUTOENCODER",
+          "link": 23
+        }
+      ],
+      "outputs": [
+        {
+          "name": "PIPELINE",
+          "type": "PIPELINE",
+          "links": [
+            24
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "DiffusersMVModelMakeup"
+      },
+      "widgets_values": [
+        true,
+        "huanngzh/mv-adapter",
+        "mvadapter_i2mv_sdxl.safetensors",
+        4,
+        true,
+        false
+      ]
+    },
+    {
+      "id": 26,
+      "type": "ViewSelector",
+      "pos": [
+        2000,
+        320
+      ],
+      "size": [
+        320,
+        190
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LIST",
+          "type": "LIST",
+          "links": [
+            26
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ViewSelector"
+      },
+      "widgets_values": [
+        true,
+        false,
+        true,
+        true,
+        true,
+        false
+      ],
+      "title": "Views: front/right/back/left"
+    },
+    {
+      "id": 27,
+      "type": "DiffusersMVSampler",
+      "pos": [
+        2370,
+        80
+      ],
+      "size": [
+        380,
+        380
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "pipeline",
+          "type": "PIPELINE",
+          "link": 24
+        },
+        {
+          "name": "reference_image",
+          "type": "IMAGE",
+          "link": 25,
+          "shape": 7
+        },
+        {
+          "name": "controlnet_image",
+          "type": "IMAGE",
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "azimuth_degrees",
+          "type": "LIST",
+          "link": 26,
+          "shape": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            27,
+            28,
+            30,
+            32,
+            34
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "DiffusersMVSampler"
+      },
+      "widgets_values": [
+        4,
+        "clean 3d asset render, neutral studio background, consistent subject, orthographic model sheet",
+        "watermark, ugly, deformed, noisy, blurry, low contrast",
+        768,
+        768,
+        40,
+        3.0,
+        0,
+        "fixed",
+        1.0
+      ],
+      "title": "MV-Adapter sampler (~3.5 min)"
+    },
+    {
+      "id": 28,
+      "type": "SaveImage",
+      "pos": [
+        2370,
+        520
+      ],
+      "size": [
+        400,
+        440
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 27
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ASSET_VIEWS"
+      ],
+      "title": "4 ortho views (F/R/B/L)"
+    },
+    {
+      "id": 40,
+      "type": "ImageFromBatch",
+      "pos": [
+        2850,
+        80
+      ],
+      "size": [
+        260,
+        106
+      ],
+      "flags": {},
+      "order": 26,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 28
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            29
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageFromBatch"
+      },
+      "widgets_values": [
+        0,
+        1
+      ],
+      "title": "view 0: front"
+    },
+    {
+      "id": 50,
+      "type": "Trellis2PreProcessImage_GGUF",
+      "pos": [
+        3150,
+        80
+      ],
+      "size": [
+        280,
+        90
+      ],
+      "flags": {},
+      "order": 27,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 29
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            37
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2PreProcessImage_GGUF"
+      },
+      "widgets_values": [
+        25,
+        true
+      ],
+      "title": "prep front (rembg)"
+    },
+    {
+      "id": 41,
+      "type": "ImageFromBatch",
+      "pos": [
+        2850,
+        250
+      ],
+      "size": [
+        260,
+        106
+      ],
+      "flags": {},
+      "order": 28,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 30
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            31
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageFromBatch"
+      },
+      "widgets_values": [
+        1,
+        1
+      ],
+      "title": "view 1: right"
+    },
+    {
+      "id": 51,
+      "type": "Trellis2PreProcessImage_GGUF",
+      "pos": [
+        3150,
+        250
+      ],
+      "size": [
+        280,
+        90
+      ],
+      "flags": {},
+      "order": 29,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 31
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            40
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2PreProcessImage_GGUF"
+      },
+      "widgets_values": [
+        25,
+        true
+      ],
+      "title": "prep right (rembg)"
+    },
+    {
+      "id": 42,
+      "type": "ImageFromBatch",
+      "pos": [
+        2850,
+        420
+      ],
+      "size": [
+        260,
+        106
+      ],
+      "flags": {},
+      "order": 30,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 32
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            33
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageFromBatch"
+      },
+      "widgets_values": [
+        2,
+        1
+      ],
+      "title": "view 2: back"
+    },
+    {
+      "id": 52,
+      "type": "Trellis2PreProcessImage_GGUF",
+      "pos": [
+        3150,
+        420
+      ],
+      "size": [
+        280,
+        90
+      ],
+      "flags": {},
+      "order": 31,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 33
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            38
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2PreProcessImage_GGUF"
+      },
+      "widgets_values": [
+        25,
+        true
+      ],
+      "title": "prep back (rembg)"
+    },
+    {
+      "id": 43,
+      "type": "ImageFromBatch",
+      "pos": [
+        2850,
+        590
+      ],
+      "size": [
+        260,
+        106
+      ],
+      "flags": {},
+      "order": 32,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 34
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            35
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageFromBatch"
+      },
+      "widgets_values": [
+        3,
+        1
+      ],
+      "title": "view 3: left"
+    },
+    {
+      "id": 53,
+      "type": "Trellis2PreProcessImage_GGUF",
+      "pos": [
+        3150,
+        590
+      ],
+      "size": [
+        280,
+        90
+      ],
+      "flags": {},
+      "order": 33,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 35
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            39
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2PreProcessImage_GGUF"
+      },
+      "widgets_values": [
+        25,
+        true
+      ],
+      "title": "prep left (rembg)"
+    },
+    {
+      "id": 48,
+      "type": "Trellis2LoadModel_GGUF",
+      "pos": [
+        2850,
+        780
+      ],
+      "size": [
+        320,
+        180
+      ],
+      "flags": {},
+      "order": 34,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "pipeline",
+          "type": "TRELLIS2PIPELINE",
+          "links": [
+            36
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2LoadModel_GGUF"
+      },
+      "widgets_values": [
+        "TRELLIS.2-4B",
+        "GGUF Q4_K_M",
+        "flash_attn",
+        "cuda",
+        true,
+        true
+      ]
+    },
+    {
+      "id": 49,
+      "type": "Trellis2MeshWithVoxelMultiViewGenerator_GGUF",
+      "pos": [
+        3470,
+        80
+      ],
+      "size": [
+        360,
+        740
+      ],
+      "flags": {},
+      "order": 35,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "pipeline",
+          "type": "TRELLIS2PIPELINE",
+          "link": 36
+        },
+        {
+          "name": "front_image",
+          "type": "IMAGE",
+          "link": 37
+        },
+        {
+          "name": "back_image",
+          "type": "IMAGE",
+          "link": 38
+        },
+        {
+          "name": "left_image",
+          "type": "IMAGE",
+          "link": 39
+        },
+        {
+          "name": "right_image",
+          "type": "IMAGE",
+          "link": 40
+        }
+      ],
+      "outputs": [
+        {
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "links": [
+            41
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "bvh",
+          "type": "BVH",
+          "links": [
+            42
+          ],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2MeshWithVoxelMultiViewGenerator_GGUF"
+      },
+      "widgets_values": [
+        12345,
+        "fixed",
+        "1024_cascade",
+        12,
+        6.5,
+        0.05,
+        4.0,
+        12,
+        6.5,
+        0.05,
+        4.0,
+        12,
+        3.0,
+        0.2,
+        3.0,
+        999999,
+        32,
+        true,
+        0.1,
+        1.0,
+        0.1,
+        1.0,
+        0.0,
+        0.9,
+        true,
+        "z",
+        1.0,
+        "euler",
+        "euler",
+        "euler"
+      ],
+      "title": "Trellis multiview generator"
+    },
+    {
+      "id": 60,
+      "type": "Trellis2PostProcessAndUnWrapAndRasterizer_GGUF",
+      "pos": [
+        3870,
+        80
+      ],
+      "size": [
+        360,
+        620
+      ],
+      "flags": {},
+      "order": 36,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "mesh",
+          "type": "MESHWITHVOXEL",
+          "link": 41
+        },
+        {
+          "name": "bvh",
+          "type": "BVH",
+          "link": 42
+        }
+      ],
+      "outputs": [
+        {
+          "name": "trimesh",
+          "type": "TRIMESH",
+          "links": [
+            43
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "base_color_texture",
+          "type": "IMAGE",
+          "links": [
+            45
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "metallic_roughness_texture",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2PostProcessAndUnWrapAndRasterizer_GGUF"
+      },
+      "widgets_values": [
+        60.0,
+        0,
+        1,
+        1,
+        2048,
+        true,
+        1.0,
+        0.0,
+        200000,
+        "Cumesh",
+        true,
+        "OPAQUE",
+        "1024",
+        false,
+        true,
+        false,
+        false,
+        "Xatlas",
+        true
+      ],
+      "title": "Post-process + Xatlas unwrap + texture bake"
+    },
+    {
+      "id": 61,
+      "type": "Trellis2ExportMesh_GGUF",
+      "pos": [
+        4270,
+        80
+      ],
+      "size": [
+        300,
+        110
+      ],
+      "flags": {},
+      "order": 37,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "trimesh",
+          "type": "TRIMESH",
+          "link": 43
+        }
+      ],
+      "outputs": [
+        {
+          "name": "glb_path",
+          "type": "STRING",
+          "links": [
+            44
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2ExportMesh_GGUF"
+      },
+      "widgets_values": [
+        "3D/13_ASSET_FACTORY",
+        "glb"
+      ]
+    },
+    {
+      "id": 62,
+      "type": "Preview3D",
+      "pos": [
+        4270,
+        250
+      ],
+      "size": [
+        420,
+        450
+      ],
+      "flags": {},
+      "order": 38,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "camera_info",
+          "type": "LOAD3D_CAMERA",
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "bg_image",
+          "type": "IMAGE",
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "model_file",
+          "type": "STRING,FILE_3D_GLB,FILE_3D_GLTF,FILE_3D_FBX,FILE_3D_OBJ,FILE_3D_STL,FILE_3D_USDZ,FILE_3D",
+          "link": 44,
+          "widget": {
+            "name": "model_file"
+          }
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "Preview3D"
+      },
+      "widgets_values": [
+        "",
+        ""
+      ]
+    },
+    {
+      "id": 63,
+      "type": "PreviewImage",
+      "pos": [
+        4270,
+        760
+      ],
+      "size": [
+        300,
+        270
+      ],
+      "flags": {},
+      "order": 39,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 45
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": [],
+      "title": "Baked base-color texture"
+    },
+    {
+      "id": 99,
+      "type": "Note",
+      "pos": [
+        40,
+        900
+      ],
+      "size": [
+        340,
+        420
+      ],
+      "flags": {},
+      "order": 40,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "Note"
+      },
+      "widgets_values": [
+        "13 - ASSET FACTORY   concept -> 4 ortho views -> textured 3D asset\n\nSTEP 1 - CONCEPT (group 1, active):\n  Type your asset prompt, Run (~seconds). Iterate by editing the prompt or\n  bumping the Seed. Optional: enable the Reference nodes (Ctrl+B) to guide\n  with an image. KEEP the seed control on 'fixed' \u2014 that is what lets the\n  3D stages reuse the cached concept later.\n\nSTEP 2 - PRESS PLAY ON 3D (groups 2+3):\n  When you love the concept, select ALL nodes of groups 2 and 3 and press\n  Ctrl+B to enable, then Run. The concept is NOT regenerated (cache); the\n  run makes 4 ortho views (~3.5 min) then the textured mesh (~3 min).\n  Output: output/3D/13_ASSET_FACTORY_*.glb (200k faces, Xatlas UVs, 2048\n  texture) + ASSET_VIEWS_* (front/right/back/left reference sheet images).\n\nIn Blender: File > Import > glTF. Views = your modeling/paintover reference.\nQuality knobs: SimplifyMesh target faces, texture_size, GGUF Q5_K_M model."
+      ],
+      "color": "#432",
+      "bgcolor": "#432"
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      10,
+      0,
+      "MODEL"
+    ],
+    [
+      2,
+      2,
+      0,
+      4,
+      0,
+      "CLIP"
+    ],
+    [
+      3,
+      4,
+      0,
+      5,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      4,
+      5,
+      0,
+      33,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      5,
+      30,
+      0,
+      31,
+      0,
+      "IMAGE"
+    ],
+    [
+      6,
+      31,
+      0,
+      32,
+      0,
+      "IMAGE"
+    ],
+    [
+      7,
+      3,
+      0,
+      32,
+      1,
+      "VAE"
+    ],
+    [
+      8,
+      32,
+      0,
+      33,
+      1,
+      "LATENT"
+    ],
+    [
+      9,
+      33,
+      0,
+      10,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      10,
+      7,
+      0,
+      11,
+      0,
+      "NOISE"
+    ],
+    [
+      11,
+      10,
+      0,
+      11,
+      1,
+      "GUIDER"
+    ],
+    [
+      12,
+      8,
+      0,
+      11,
+      2,
+      "SAMPLER"
+    ],
+    [
+      13,
+      9,
+      0,
+      11,
+      3,
+      "SIGMAS"
+    ],
+    [
+      14,
+      6,
+      0,
+      11,
+      4,
+      "LATENT"
+    ],
+    [
+      15,
+      11,
+      0,
+      12,
+      0,
+      "LATENT"
+    ],
+    [
+      16,
+      3,
+      0,
+      12,
+      1,
+      "VAE"
+    ],
+    [
+      17,
+      12,
+      0,
+      13,
+      0,
+      "IMAGE"
+    ],
+    [
+      18,
+      20,
+      0,
+      21,
+      0,
+      "FUNCTION"
+    ],
+    [
+      19,
+      12,
+      0,
+      21,
+      1,
+      "IMAGE"
+    ],
+    [
+      20,
+      22,
+      0,
+      23,
+      0,
+      "PIPELINE"
+    ],
+    [
+      21,
+      22,
+      0,
+      25,
+      0,
+      "PIPELINE"
+    ],
+    [
+      22,
+      23,
+      0,
+      25,
+      1,
+      "SCHEDULER"
+    ],
+    [
+      23,
+      24,
+      0,
+      25,
+      2,
+      "AUTOENCODER"
+    ],
+    [
+      24,
+      25,
+      0,
+      27,
+      0,
+      "PIPELINE"
+    ],
+    [
+      25,
+      21,
+      0,
+      27,
+      1,
+      "IMAGE"
+    ],
+    [
+      26,
+      26,
+      0,
+      27,
+      3,
+      "LIST"
+    ],
+    [
+      27,
+      27,
+      0,
+      28,
+      0,
+      "IMAGE"
+    ],
+    [
+      28,
+      27,
+      0,
+      40,
+      0,
+      "IMAGE"
+    ],
+    [
+      29,
+      40,
+      0,
+      50,
+      0,
+      "IMAGE"
+    ],
+    [
+      30,
+      27,
+      0,
+      41,
+      0,
+      "IMAGE"
+    ],
+    [
+      31,
+      41,
+      0,
+      51,
+      0,
+      "IMAGE"
+    ],
+    [
+      32,
+      27,
+      0,
+      42,
+      0,
+      "IMAGE"
+    ],
+    [
+      33,
+      42,
+      0,
+      52,
+      0,
+      "IMAGE"
+    ],
+    [
+      34,
+      27,
+      0,
+      43,
+      0,
+      "IMAGE"
+    ],
+    [
+      35,
+      43,
+      0,
+      53,
+      0,
+      "IMAGE"
+    ],
+    [
+      36,
+      48,
+      0,
+      49,
+      0,
+      "TRELLIS2PIPELINE"
+    ],
+    [
+      37,
+      50,
+      0,
+      49,
+      1,
+      "IMAGE"
+    ],
+    [
+      38,
+      52,
+      0,
+      49,
+      2,
+      "IMAGE"
+    ],
+    [
+      39,
+      53,
+      0,
+      49,
+      3,
+      "IMAGE"
+    ],
+    [
+      40,
+      51,
+      0,
+      49,
+      4,
+      "IMAGE"
+    ],
+    [
+      41,
+      49,
+      0,
+      60,
+      0,
+      "MESHWITHVOXEL"
+    ],
+    [
+      42,
+      49,
+      1,
+      60,
+      1,
+      "BVH"
+    ],
+    [
+      43,
+      60,
+      0,
+      61,
+      0,
+      "TRIMESH"
+    ],
+    [
+      44,
+      61,
+      0,
+      62,
+      2,
+      "STRING"
+    ],
+    [
+      45,
+      60,
+      1,
+      63,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "1. CONCEPT \u2014 Flux 2 (iterate here)",
+      "bounding": [
+        20,
+        0,
+        1520,
+        1350
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "1b. IMAGE REFERENCE (optional \u2014 Ctrl+B)",
+      "bounding": [
+        360,
+        420,
+        640,
+        780
+      ],
+      "color": "#a1309b",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "2. MULTIVIEW \u2014 4 ortho views (Ctrl+B when concept approved)",
+      "bounding": [
+        1620,
+        0,
+        1180,
+        1000
+      ],
+      "color": "#3f9b46",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "3. TRELLIS 3D \u2014 textured .glb (Ctrl+B with group 2)",
+      "bounding": [
+        2820,
+        0,
+        1900,
+        1060
+      ],
+      "color": "#9b6b3f",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.7,
+      "offset": [
+        400,
+        300
+      ]
+    }
+  },
+  "version": 0.4
+}
