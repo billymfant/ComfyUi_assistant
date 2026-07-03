@@ -1,8 +1,16 @@
 """Generate workflows/3d modeling helper/13_ASSET_FACTORY.json — the master pipeline:
 
-  G1 CONCEPT   (Flux 2 Klein t2i + optional image reference)   -> concept image
-  G2 MULTIVIEW (MV-Adapter i2mv SDXL)                          -> 4 ortho views (F/R/B/L)
-  G3 TRELLIS   (multiview generator + unwrap/rasterize)        -> textured .glb (Xatlas, 200k)
+  G1 CONCEPT      (Flux 2 Klein t2i + optional image reference)  -> concept image
+  G2 MULTIVIEW    (MV-Adapter i2mv SDXL, 768)                    -> 4 ortho views (F/R/B/L)
+  G2b VIEW ENHANCE (4x-UltraSharp -> 1024 -> Flux2 i2i @ 0.30)   -> HQ 1024 views
+  G3 TRELLIS      (multiview generator + unwrap/rasterize)       -> textured .glb (Xatlas, 200k)
+
+Quality decisions (2026-07-04, after "views degrade vs concept" feedback):
+  - Trellis front view = the ORIGINAL Flux2 concept image (not MV-Adapter's re-render);
+    MV-Adapter only supplies back/left/right, and those pass through a Flux2 detail
+    pass (denoise 0.30, conditioned on the user's own ASSET PROMPT) before Trellis.
+  - Trellis generator runs the pack author's reference settings: 25 steps on all three
+    stages, guidance_rescale 0.2, blend_temperature 2.0, GGUF Q8_0, 4096 texture bake.
 
 "Press play" UX: G2+G3 ship BYPASSED. Iterate the concept in G1 (edit prompt / seed, Run —
 seconds per try). When you love it, select the G2+G3 groups, Ctrl+B, Run: ComfyUI's caching
@@ -121,8 +129,8 @@ mv = w.add(27, "DiffusersMVSampler", [2370, 80], [380, 380],
 mv["inputs"][1]["shape"] = 7
 mv["inputs"][2]["shape"] = 7
 mv["inputs"][3]["shape"] = 7
-w.add(28, "SaveImage", [2370, 520], [400, 440], ["ASSET_VIEWS"],
-      [("images", "IMAGE")], [], mode=BYPASS, title="4 ortho views (F/R/B/L)")
+w.add(28, "SaveImage", [2370, 520], [400, 440], ["ASSET_VIEWS_RAW"],
+      [("images", "IMAGE")], [], mode=BYPASS, title="raw 768 views (debug)")
 
 w.connect(20, 0, 21, 0, "FUNCTION")
 w.connect(12, 0, 21, 1, "IMAGE")          # concept -> preprocessor
@@ -135,41 +143,96 @@ w.connect(21, 0, 27, 1, "IMAGE")
 w.connect(26, 0, 27, 3, "LIST")
 w.connect(27, 0, 28, 0, "IMAGE")
 
+# ---------------- G2b VIEW ENHANCE (Flux2 detail pass on the 4 views) — BYPASSED ----------------
+# MV-Adapter's SDXL 768 output is soft next to the Flux2 concept. Recover the detail:
+# 4x-UltraSharp -> 1024 -> Flux2 img2img at denoise 0.30, conditioned on the same
+# ASSET PROMPT (node 5). Runs the 4-view batch in one sampler pass.
+w.add(70, "UpscaleModelLoader", [1650, 1100], [300, 58], ["4x-UltraSharp.pth"],
+      [], [("UPSCALE_MODEL", "UPSCALE_MODEL")], mode=BYPASS)
+w.add(71, "ImageUpscaleWithModel", [1650, 1200], [300, 46], [],
+      [("upscale_model", "UPSCALE_MODEL"), ("image", "IMAGE")], [("IMAGE", "IMAGE")], mode=BYPASS)
+w.add(72, "ImageScaleToMaxDimension", [1650, 1290], [300, 82], ["lanczos", 1024],
+      [("image", "IMAGE")], [("IMAGE", "IMAGE")], mode=BYPASS, title="down to 1024")
+w.add(73, "VAEEncode", [1650, 1420], [210, 46], [],
+      [("pixels", "IMAGE"), ("vae", "VAE")], [("LATENT", "LATENT")], mode=BYPASS)
+w.add(74, "RandomNoise", [2000, 1100], [280, 82], [67890, "fixed"],
+      [], [("NOISE", "NOISE")], mode=BYPASS, title="Refine seed")
+w.add(75, "Flux2Scheduler", [2000, 1230], [280, 82], [20, 1024, 1024],
+      [], [("SIGMAS", "SIGMAS")], mode=BYPASS)
+w.add(76, "SplitSigmasDenoise", [2000, 1360], [280, 58], [0.30],
+      [("sigmas", "SIGMAS")], [("high_sigmas", "SIGMAS"), ("low_sigmas", "SIGMAS")],
+      mode=BYPASS, title="Detail strength (denoise 0.25-0.35)")
+w.add(77, "BasicGuider", [2000, 1460], [280, 46], [],
+      [("model", "MODEL"), ("conditioning", "CONDITIONING")], [("GUIDER", "GUIDER")], mode=BYPASS)
+w.add(78, "SamplerCustomAdvanced", [2330, 1100], [300, 150], [],
+      [("noise", "NOISE"), ("guider", "GUIDER"), ("sampler", "SAMPLER"),
+       ("sigmas", "SIGMAS"), ("latent_image", "LATENT")],
+      [("output", "LATENT"), ("denoised_output", "LATENT")], mode=BYPASS,
+      title="Flux2 detail pass (4-view batch)")
+w.add(79, "VAEDecode", [2330, 1300], [210, 46], [],
+      [("samples", "LATENT"), ("vae", "VAE")], [("IMAGE", "IMAGE")], mode=BYPASS)
+w.add(80, "SaveImage", [2330, 1400], [400, 440], ["ASSET_VIEWS_HQ"],
+      [("images", "IMAGE")], [], mode=BYPASS, title="HQ 1024 views (F/R/B/L)")
+
+w.connect(70, 0, 71, 0, "UPSCALE_MODEL")
+w.connect(27, 0, 71, 1, "IMAGE")          # MV batch -> upscaler
+w.connect(71, 0, 72, 0, "IMAGE")
+w.connect(72, 0, 73, 0, "IMAGE")
+w.connect(3, 0, 73, 1, "VAE")
+w.connect(1, 0, 77, 0, "MODEL")
+w.connect(5, 0, 77, 1, "CONDITIONING")    # user's ASSET PROMPT guides the detail
+w.connect(74, 0, 78, 0, "NOISE")
+w.connect(77, 0, 78, 1, "GUIDER")
+w.connect(8, 0, 78, 2, "SAMPLER")
+w.connect(75, 0, 76, 0, "SIGMAS")
+w.connect(76, 1, 78, 3, "SIGMAS")         # low_sigmas = last 30% of the schedule
+w.connect(73, 0, 78, 4, "LATENT")
+w.connect(78, 0, 79, 0, "LATENT")
+w.connect(3, 0, 79, 1, "VAE")
+w.connect(79, 0, 80, 0, "IMAGE")
+
 # ---------------- G3 TRELLIS 3D (multiview -> textured glb) — BYPASSED ----------------
-# split the 4-view batch: ViewSelector order = front(0), right(1), back(2), left(3)
-for i, (nid, label) in enumerate([(40, "front"), (41, "right"), (42, "back"), (43, "left")]):
-    w.add(nid, "ImageFromBatch", [2850, 80 + i * 170], [260, 106], [i, 1],
-          [("image", "IMAGE")], [("IMAGE", "IMAGE")], mode=BYPASS, title=f"view {i}: {label}")
-    w.connect(27, 0, nid, 0, "IMAGE")
-    w.add(nid + 10, "Trellis2PreProcessImage_GGUF", [3150, 80 + i * 170], [280, 90],
+# Trellis front view = the ORIGINAL concept image (sharpest data we have).
+w.add(45, "Trellis2PreProcessImage_GGUF", [3150, 80], [280, 90], [25, True],
+      [("image", "IMAGE")], [("image", "IMAGE")], mode=BYPASS,
+      title="prep front = CONCEPT image (rembg)")
+w.connect(12, 0, 45, 0, "IMAGE")
+
+# split the enhanced 4-view batch: ViewSelector order = front(0), right(1), back(2), left(3);
+# front(0) is unused here (concept replaces it), so only right/back/left are split out.
+for i, (nid, label, bidx) in enumerate([(41, "right", 1), (42, "back", 2), (43, "left", 3)]):
+    w.add(nid, "ImageFromBatch", [2850, 250 + i * 170], [260, 106], [bidx, 1],
+          [("image", "IMAGE")], [("IMAGE", "IMAGE")], mode=BYPASS, title=f"view {bidx}: {label}")
+    w.connect(79, 0, nid, 0, "IMAGE")     # enhanced views, not raw MV output
+    w.add(nid + 10, "Trellis2PreProcessImage_GGUF", [3150, 250 + i * 170], [280, 90],
           [25, True], [("image", "IMAGE")], [("image", "IMAGE")], mode=BYPASS,
           title=f"prep {label} (rembg)")
     w.connect(nid, 0, nid + 10, 0, "IMAGE")
 
 w.add(48, "Trellis2LoadModel_GGUF", [2850, 780], [320, 180],
-      ["TRELLIS.2-4B", "GGUF Q4_K_M", "flash_attn", "cuda", True, True], [],
+      ["TRELLIS.2-4B", "GGUF Q8_0", "flash_attn", "cuda", True, True], [],
       [("pipeline", "TRELLIS2PIPELINE")], mode=BYPASS)
 w.add(49, "Trellis2MeshWithVoxelMultiViewGenerator_GGUF", [3470, 80], [360, 740],
       [12345, "fixed", "1024_cascade",
-       12, 6.5, 0.05, 4.0,            # sparse structure
-       12, 6.5, 0.05, 4.0,            # shape
-       12, 3.0, 0.2, 3.0,             # texture slat
+       25, 6.5, 0.2, 4.0,             # sparse structure (author ref: 25 steps, rescale 0.2)
+       25, 6.5, 0.2, 4.0,             # shape
+       25, 3.0, 0.2, 3.0,             # texture slat
        999999, 32, True,              # max_tokens, ss_resolution, texture slat on
        0.1, 1.0, 0.1, 1.0, 0.0, 0.9,  # guidance intervals
-       True, "z", 1.0,                # tiled decoder, front_axis, blend_temperature
+       True, "z", 2.0,                # tiled decoder, front_axis, blend_temperature (ref: 2)
        "euler", "euler", "euler"],
       [("pipeline", "TRELLIS2PIPELINE"), ("front_image", "IMAGE"),
        ("back_image", "IMAGE"), ("left_image", "IMAGE"), ("right_image", "IMAGE")],
       [("mesh", "MESHWITHVOXEL"), ("bvh", "BVH")], mode=BYPASS, title="Trellis multiview generator")
 w.connect(48, 0, 49, 0, "TRELLIS2PIPELINE")
-w.connect(40 + 10, 0, 49, 1, "IMAGE")   # front
+w.connect(45, 0, 49, 1, "IMAGE")        # front = concept
 w.connect(42 + 10, 0, 49, 2, "IMAGE")   # back
 w.connect(43 + 10, 0, 49, 3, "IMAGE")   # left
 w.connect(41 + 10, 0, 49, 4, "IMAGE")   # right
 
 w.add(60, "Trellis2PostProcessAndUnWrapAndRasterizer_GGUF", [3870, 80], [360, 620],
       [60.0, 0, 1, 1,                 # mesh cluster
-       2048,                          # texture_size
+       4096,                          # texture_size (author ref)
        True, 1.0, 0.0,                # remesh
        200000, "Cumesh", True,        # simplify to 200k, fill holes
        "OPAQUE", "1024", False,       # alpha, dual contouring res, double-side
@@ -197,26 +260,31 @@ w.connect(61, 0, 62, 2, "STRING")
 w.connect(60, 1, 63, 0, "IMAGE")
 
 # ---------------- Note ----------------
-note = ("13 - ASSET FACTORY   concept -> 4 ortho views -> textured 3D asset\n\n"
+note = ("13 - ASSET FACTORY   concept -> HQ ortho views -> textured 3D asset\n\n"
         "STEP 1 - CONCEPT (group 1, active):\n"
         "  Type your asset prompt, Run (~seconds). Iterate by editing the prompt or\n"
         "  bumping the Seed. Optional: enable the Reference nodes (Ctrl+B) to guide\n"
         "  with an image. KEEP the seed control on 'fixed' — that is what lets the\n"
         "  3D stages reuse the cached concept later.\n\n"
-        "STEP 2 - PRESS PLAY ON 3D (groups 2+3):\n"
-        "  When you love the concept, select ALL nodes of groups 2 and 3 and press\n"
-        "  Ctrl+B to enable, then Run. The concept is NOT regenerated (cache); the\n"
-        "  run makes 4 ortho views (~3.5 min) then the textured mesh (~3 min).\n"
-        "  Output: output/3D/13_ASSET_FACTORY_*.glb (200k faces, Xatlas UVs, 2048\n"
-        "  texture) + ASSET_VIEWS_* (front/right/back/left reference sheet images).\n\n"
+        "STEP 2 - PRESS PLAY ON 3D (groups 2 + 2b + 3):\n"
+        "  When you love the concept, select ALL nodes of groups 2, 2b and 3 and\n"
+        "  press Ctrl+B to enable, then Run. The concept is NOT regenerated (cache).\n"
+        "  Pipeline: 4 ortho views (~3.5 min) -> Flux2 detail pass at 1024 (~1 min)\n"
+        "  -> Trellis 25-step Q8 mesh + 4096 texture bake (~8 min).\n"
+        "  The Trellis FRONT view is your original concept image; MV-Adapter only\n"
+        "  fills in back/left/right (enhanced before use).\n"
+        "  Output: output/3D/13_ASSET_FACTORY_*.glb (200k faces, Xatlas UVs, 4096\n"
+        "  texture) + ASSET_VIEWS_HQ_* (the enhanced view sheet).\n\n"
         "In Blender: File > Import > glTF. Views = your modeling/paintover reference.\n"
-        "Quality knobs: SimplifyMesh target faces, texture_size, GGUF Q5_K_M model.")
+        "Quality knobs: detail-pass denoise (0.25-0.35), Trellis steps, target faces,\n"
+        "texture_size. Speed fallback: GGUF Q4_K_M + 12 steps + 2048 texture.")
 w.add(99, "Note", [40, 900], [340, 420], [note], [], [], color="#432")
 
 # ---------------- groups ----------------
 w.group(1, "1. CONCEPT — Flux 2 (iterate here)", [20, 0, 1520, 1350], "#3f789e")
 w.group(2, "1b. IMAGE REFERENCE (optional — Ctrl+B)", [360, 420, 640, 780], "#a1309b")
 w.group(3, "2. MULTIVIEW — 4 ortho views (Ctrl+B when concept approved)", [1620, 0, 1180, 1000], "#3f9b46")
+w.group(5, "2b. VIEW ENHANCE — Flux2 detail pass (Ctrl+B with group 2)", [1610, 1040, 1450, 860], "#6b9b3f")
 w.group(4, "3. TRELLIS 3D — textured .glb (Ctrl+B with group 2)", [2820, 0, 1900, 1060], "#9b6b3f")
 
 res = w.finalize(os.path.abspath(OUT), wid="asset-factory")

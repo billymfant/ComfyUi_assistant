@@ -2,11 +2,12 @@
 the live server's object_info, then POST it to /prompt and poll. This validates
 that a saved workflow file actually executes — not just that links resolve.
 
-Usage: run_ui_workflow.py <workflow.json>
+Usage: run_ui_workflow.py <workflow.json> [timeout_seconds]
 """
 import json, sys, time, urllib.request, os
 os.environ["no_proxy"] = "*"; os.environ["NO_PROXY"] = "*"
 HOST = "http://127.0.0.1:8188"
+TIMEOUT = int(sys.argv[2]) if len(sys.argv) > 2 else 900
 
 wf = json.load(open(sys.argv[1], encoding="utf-8"))
 nodes = {n["id"]: n for n in wf["nodes"]}
@@ -111,5 +112,5 @@ while True:
                     if m[0] == "execution_error":
                         print("  ERR:", json.dumps(m[1])[:800])
             break
-    if time.time() - t0 > 900:
+    if time.time() - t0 > TIMEOUT:
         print("timeout"); break

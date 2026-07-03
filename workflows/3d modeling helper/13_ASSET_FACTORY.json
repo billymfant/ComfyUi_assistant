@@ -2,7 +2,7 @@
   "id": "asset-factory",
   "revision": 0,
   "last_node_id": 100,
-  "last_link_id": 45,
+  "last_link_id": 60,
   "nodes": [
     {
       "id": 1,
@@ -24,7 +24,8 @@
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            1
+            1,
+            33
           ],
           "slot_index": 0
         }
@@ -94,7 +95,9 @@
           "type": "VAE",
           "links": [
             7,
-            16
+            16,
+            32,
+            42
           ],
           "slot_index": 0
         }
@@ -174,7 +177,8 @@
           "name": "CONDITIONING",
           "type": "CONDITIONING",
           "links": [
-            4
+            4,
+            34
           ],
           "slot_index": 0
         }
@@ -440,7 +444,8 @@
           "name": "SAMPLER",
           "type": "SAMPLER",
           "links": [
-            12
+            12,
+            37
           ],
           "slot_index": 0
         }
@@ -623,7 +628,8 @@
           "type": "IMAGE",
           "links": [
             17,
-            19
+            19,
+            44
           ],
           "slot_index": 0
         }
@@ -997,10 +1003,7 @@
           "type": "IMAGE",
           "links": [
             27,
-            28,
-            30,
-            32,
-            34
+            29
           ],
           "slot_index": 0
         }
@@ -1048,65 +1051,62 @@
         "Node name for S&R": "SaveImage"
       },
       "widgets_values": [
-        "ASSET_VIEWS"
+        "ASSET_VIEWS_RAW"
       ],
-      "title": "4 ortho views (F/R/B/L)"
+      "title": "raw 768 views (debug)"
     },
     {
-      "id": 40,
-      "type": "ImageFromBatch",
+      "id": 70,
+      "type": "UpscaleModelLoader",
       "pos": [
-        2850,
-        80
+        1650,
+        1100
       ],
       "size": [
-        260,
-        106
+        300,
+        58
       ],
       "flags": {},
       "order": 26,
       "mode": 4,
-      "inputs": [
-        {
-          "name": "image",
-          "type": "IMAGE",
-          "link": 28
-        }
-      ],
+      "inputs": [],
       "outputs": [
         {
-          "name": "IMAGE",
-          "type": "IMAGE",
+          "name": "UPSCALE_MODEL",
+          "type": "UPSCALE_MODEL",
           "links": [
-            29
+            28
           ],
           "slot_index": 0
         }
       ],
       "properties": {
-        "Node name for S&R": "ImageFromBatch"
+        "Node name for S&R": "UpscaleModelLoader"
       },
       "widgets_values": [
-        0,
-        1
-      ],
-      "title": "view 0: front"
+        "4x-UltraSharp.pth"
+      ]
     },
     {
-      "id": 50,
-      "type": "Trellis2PreProcessImage_GGUF",
+      "id": 71,
+      "type": "ImageUpscaleWithModel",
       "pos": [
-        3150,
-        80
+        1650,
+        1200
       ],
       "size": [
-        280,
-        90
+        300,
+        46
       ],
       "flags": {},
       "order": 27,
       "mode": 4,
       "inputs": [
+        {
+          "name": "upscale_model",
+          "type": "UPSCALE_MODEL",
+          "link": 28
+        },
         {
           "name": "image",
           "type": "IMAGE",
@@ -1115,33 +1115,29 @@
       ],
       "outputs": [
         {
-          "name": "image",
+          "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            37
+            30
           ],
           "slot_index": 0
         }
       ],
       "properties": {
-        "Node name for S&R": "Trellis2PreProcessImage_GGUF"
+        "Node name for S&R": "ImageUpscaleWithModel"
       },
-      "widgets_values": [
-        25,
-        true
-      ],
-      "title": "prep front (rembg)"
+      "widgets_values": []
     },
     {
-      "id": 41,
-      "type": "ImageFromBatch",
+      "id": 72,
+      "type": "ImageScaleToMaxDimension",
       "pos": [
-        2850,
-        250
+        1650,
+        1290
       ],
       "size": [
-        260,
-        106
+        300,
+        82
       ],
       "flags": {},
       "order": 28,
@@ -1159,6 +1155,418 @@
           "type": "IMAGE",
           "links": [
             31
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageScaleToMaxDimension"
+      },
+      "widgets_values": [
+        "lanczos",
+        1024
+      ],
+      "title": "down to 1024"
+    },
+    {
+      "id": 73,
+      "type": "VAEEncode",
+      "pos": [
+        1650,
+        1420
+      ],
+      "size": [
+        210,
+        46
+      ],
+      "flags": {},
+      "order": 29,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "pixels",
+          "type": "IMAGE",
+          "link": 31
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 32
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            40
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEEncode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 74,
+      "type": "RandomNoise",
+      "pos": [
+        2000,
+        1100
+      ],
+      "size": [
+        280,
+        82
+      ],
+      "flags": {},
+      "order": 30,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "NOISE",
+          "type": "NOISE",
+          "links": [
+            35
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "RandomNoise"
+      },
+      "widgets_values": [
+        67890,
+        "fixed"
+      ],
+      "title": "Refine seed"
+    },
+    {
+      "id": 75,
+      "type": "Flux2Scheduler",
+      "pos": [
+        2000,
+        1230
+      ],
+      "size": [
+        280,
+        82
+      ],
+      "flags": {},
+      "order": 31,
+      "mode": 4,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": [
+            38
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Flux2Scheduler"
+      },
+      "widgets_values": [
+        20,
+        1024,
+        1024
+      ]
+    },
+    {
+      "id": 76,
+      "type": "SplitSigmasDenoise",
+      "pos": [
+        2000,
+        1360
+      ],
+      "size": [
+        280,
+        58
+      ],
+      "flags": {},
+      "order": 32,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 38
+        }
+      ],
+      "outputs": [
+        {
+          "name": "high_sigmas",
+          "type": "SIGMAS",
+          "links": [],
+          "slot_index": 0
+        },
+        {
+          "name": "low_sigmas",
+          "type": "SIGMAS",
+          "links": [
+            39
+          ],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SplitSigmasDenoise"
+      },
+      "widgets_values": [
+        0.3
+      ],
+      "title": "Detail strength (denoise 0.25-0.35)"
+    },
+    {
+      "id": 77,
+      "type": "BasicGuider",
+      "pos": [
+        2000,
+        1460
+      ],
+      "size": [
+        280,
+        46
+      ],
+      "flags": {},
+      "order": 33,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 33
+        },
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 34
+        }
+      ],
+      "outputs": [
+        {
+          "name": "GUIDER",
+          "type": "GUIDER",
+          "links": [
+            36
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "BasicGuider"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 78,
+      "type": "SamplerCustomAdvanced",
+      "pos": [
+        2330,
+        1100
+      ],
+      "size": [
+        300,
+        150
+      ],
+      "flags": {},
+      "order": 34,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "noise",
+          "type": "NOISE",
+          "link": 35
+        },
+        {
+          "name": "guider",
+          "type": "GUIDER",
+          "link": 36
+        },
+        {
+          "name": "sampler",
+          "type": "SAMPLER",
+          "link": 37
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 39
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 40
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "LATENT",
+          "links": [
+            41
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "denoised_output",
+          "type": "LATENT",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SamplerCustomAdvanced"
+      },
+      "widgets_values": [],
+      "title": "Flux2 detail pass (4-view batch)"
+    },
+    {
+      "id": 79,
+      "type": "VAEDecode",
+      "pos": [
+        2330,
+        1300
+      ],
+      "size": [
+        210,
+        46
+      ],
+      "flags": {},
+      "order": 35,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 41
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 42
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            43,
+            45,
+            47,
+            49
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 80,
+      "type": "SaveImage",
+      "pos": [
+        2330,
+        1400
+      ],
+      "size": [
+        400,
+        440
+      ],
+      "flags": {},
+      "order": 36,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 43
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ASSET_VIEWS_HQ"
+      ],
+      "title": "HQ 1024 views (F/R/B/L)"
+    },
+    {
+      "id": 45,
+      "type": "Trellis2PreProcessImage_GGUF",
+      "pos": [
+        3150,
+        80
+      ],
+      "size": [
+        280,
+        90
+      ],
+      "flags": {},
+      "order": 37,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 44
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            52
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Trellis2PreProcessImage_GGUF"
+      },
+      "widgets_values": [
+        25,
+        true
+      ],
+      "title": "prep front = CONCEPT image (rembg)"
+    },
+    {
+      "id": 41,
+      "type": "ImageFromBatch",
+      "pos": [
+        2850,
+        250
+      ],
+      "size": [
+        260,
+        106
+      ],
+      "flags": {},
+      "order": 38,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 45
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            46
           ],
           "slot_index": 0
         }
@@ -1184,13 +1592,13 @@
         90
       ],
       "flags": {},
-      "order": 29,
+      "order": 39,
       "mode": 4,
       "inputs": [
         {
           "name": "image",
           "type": "IMAGE",
-          "link": 31
+          "link": 46
         }
       ],
       "outputs": [
@@ -1198,7 +1606,7 @@
           "name": "image",
           "type": "IMAGE",
           "links": [
-            40
+            55
           ],
           "slot_index": 0
         }
@@ -1224,13 +1632,13 @@
         106
       ],
       "flags": {},
-      "order": 30,
+      "order": 40,
       "mode": 4,
       "inputs": [
         {
           "name": "image",
           "type": "IMAGE",
-          "link": 32
+          "link": 47
         }
       ],
       "outputs": [
@@ -1238,7 +1646,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            33
+            48
           ],
           "slot_index": 0
         }
@@ -1264,13 +1672,13 @@
         90
       ],
       "flags": {},
-      "order": 31,
+      "order": 41,
       "mode": 4,
       "inputs": [
         {
           "name": "image",
           "type": "IMAGE",
-          "link": 33
+          "link": 48
         }
       ],
       "outputs": [
@@ -1278,7 +1686,7 @@
           "name": "image",
           "type": "IMAGE",
           "links": [
-            38
+            53
           ],
           "slot_index": 0
         }
@@ -1304,13 +1712,13 @@
         106
       ],
       "flags": {},
-      "order": 32,
+      "order": 42,
       "mode": 4,
       "inputs": [
         {
           "name": "image",
           "type": "IMAGE",
-          "link": 34
+          "link": 49
         }
       ],
       "outputs": [
@@ -1318,7 +1726,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            35
+            50
           ],
           "slot_index": 0
         }
@@ -1344,13 +1752,13 @@
         90
       ],
       "flags": {},
-      "order": 33,
+      "order": 43,
       "mode": 4,
       "inputs": [
         {
           "name": "image",
           "type": "IMAGE",
-          "link": 35
+          "link": 50
         }
       ],
       "outputs": [
@@ -1358,7 +1766,7 @@
           "name": "image",
           "type": "IMAGE",
           "links": [
-            39
+            54
           ],
           "slot_index": 0
         }
@@ -1384,7 +1792,7 @@
         180
       ],
       "flags": {},
-      "order": 34,
+      "order": 44,
       "mode": 4,
       "inputs": [],
       "outputs": [
@@ -1392,7 +1800,7 @@
           "name": "pipeline",
           "type": "TRELLIS2PIPELINE",
           "links": [
-            36
+            51
           ],
           "slot_index": 0
         }
@@ -1402,7 +1810,7 @@
       },
       "widgets_values": [
         "TRELLIS.2-4B",
-        "GGUF Q4_K_M",
+        "GGUF Q8_0",
         "flash_attn",
         "cuda",
         true,
@@ -1421,33 +1829,33 @@
         740
       ],
       "flags": {},
-      "order": 35,
+      "order": 45,
       "mode": 4,
       "inputs": [
         {
           "name": "pipeline",
           "type": "TRELLIS2PIPELINE",
-          "link": 36
+          "link": 51
         },
         {
           "name": "front_image",
           "type": "IMAGE",
-          "link": 37
+          "link": 52
         },
         {
           "name": "back_image",
           "type": "IMAGE",
-          "link": 38
+          "link": 53
         },
         {
           "name": "left_image",
           "type": "IMAGE",
-          "link": 39
+          "link": 54
         },
         {
           "name": "right_image",
           "type": "IMAGE",
-          "link": 40
+          "link": 55
         }
       ],
       "outputs": [
@@ -1455,7 +1863,7 @@
           "name": "mesh",
           "type": "MESHWITHVOXEL",
           "links": [
-            41
+            56
           ],
           "slot_index": 0
         },
@@ -1463,7 +1871,7 @@
           "name": "bvh",
           "type": "BVH",
           "links": [
-            42
+            57
           ],
           "slot_index": 1
         }
@@ -1475,15 +1883,15 @@
         12345,
         "fixed",
         "1024_cascade",
-        12,
+        25,
         6.5,
-        0.05,
+        0.2,
         4.0,
-        12,
+        25,
         6.5,
-        0.05,
+        0.2,
         4.0,
-        12,
+        25,
         3.0,
         0.2,
         3.0,
@@ -1498,7 +1906,7 @@
         0.9,
         true,
         "z",
-        1.0,
+        2.0,
         "euler",
         "euler",
         "euler"
@@ -1517,18 +1925,18 @@
         620
       ],
       "flags": {},
-      "order": 36,
+      "order": 46,
       "mode": 4,
       "inputs": [
         {
           "name": "mesh",
           "type": "MESHWITHVOXEL",
-          "link": 41
+          "link": 56
         },
         {
           "name": "bvh",
           "type": "BVH",
-          "link": 42
+          "link": 57
         }
       ],
       "outputs": [
@@ -1536,7 +1944,7 @@
           "name": "trimesh",
           "type": "TRIMESH",
           "links": [
-            43
+            58
           ],
           "slot_index": 0
         },
@@ -1544,7 +1952,7 @@
           "name": "base_color_texture",
           "type": "IMAGE",
           "links": [
-            45
+            60
           ],
           "slot_index": 1
         },
@@ -1563,7 +1971,7 @@
         0,
         1,
         1,
-        2048,
+        4096,
         true,
         1.0,
         0.0,
@@ -1593,13 +2001,13 @@
         110
       ],
       "flags": {},
-      "order": 37,
+      "order": 47,
       "mode": 4,
       "inputs": [
         {
           "name": "trimesh",
           "type": "TRIMESH",
-          "link": 43
+          "link": 58
         }
       ],
       "outputs": [
@@ -1607,7 +2015,7 @@
           "name": "glb_path",
           "type": "STRING",
           "links": [
-            44
+            59
           ],
           "slot_index": 0
         }
@@ -1632,7 +2040,7 @@
         450
       ],
       "flags": {},
-      "order": 38,
+      "order": 48,
       "mode": 4,
       "inputs": [
         {
@@ -1650,7 +2058,7 @@
         {
           "name": "model_file",
           "type": "STRING,FILE_3D_GLB,FILE_3D_GLTF,FILE_3D_FBX,FILE_3D_OBJ,FILE_3D_STL,FILE_3D_USDZ,FILE_3D",
-          "link": 44,
+          "link": 59,
           "widget": {
             "name": "model_file"
           }
@@ -1677,13 +2085,13 @@
         270
       ],
       "flags": {},
-      "order": 39,
+      "order": 49,
       "mode": 4,
       "inputs": [
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 45
+          "link": 60
         }
       ],
       "outputs": [],
@@ -1705,7 +2113,7 @@
         420
       ],
       "flags": {},
-      "order": 40,
+      "order": 50,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -1713,7 +2121,7 @@
         "Node name for S&R": "Note"
       },
       "widgets_values": [
-        "13 - ASSET FACTORY   concept -> 4 ortho views -> textured 3D asset\n\nSTEP 1 - CONCEPT (group 1, active):\n  Type your asset prompt, Run (~seconds). Iterate by editing the prompt or\n  bumping the Seed. Optional: enable the Reference nodes (Ctrl+B) to guide\n  with an image. KEEP the seed control on 'fixed' \u2014 that is what lets the\n  3D stages reuse the cached concept later.\n\nSTEP 2 - PRESS PLAY ON 3D (groups 2+3):\n  When you love the concept, select ALL nodes of groups 2 and 3 and press\n  Ctrl+B to enable, then Run. The concept is NOT regenerated (cache); the\n  run makes 4 ortho views (~3.5 min) then the textured mesh (~3 min).\n  Output: output/3D/13_ASSET_FACTORY_*.glb (200k faces, Xatlas UVs, 2048\n  texture) + ASSET_VIEWS_* (front/right/back/left reference sheet images).\n\nIn Blender: File > Import > glTF. Views = your modeling/paintover reference.\nQuality knobs: SimplifyMesh target faces, texture_size, GGUF Q5_K_M model."
+        "13 - ASSET FACTORY   concept -> HQ ortho views -> textured 3D asset\n\nSTEP 1 - CONCEPT (group 1, active):\n  Type your asset prompt, Run (~seconds). Iterate by editing the prompt or\n  bumping the Seed. Optional: enable the Reference nodes (Ctrl+B) to guide\n  with an image. KEEP the seed control on 'fixed' \u2014 that is what lets the\n  3D stages reuse the cached concept later.\n\nSTEP 2 - PRESS PLAY ON 3D (groups 2 + 2b + 3):\n  When you love the concept, select ALL nodes of groups 2, 2b and 3 and\n  press Ctrl+B to enable, then Run. The concept is NOT regenerated (cache).\n  Pipeline: 4 ortho views (~3.5 min) -> Flux2 detail pass at 1024 (~1 min)\n  -> Trellis 25-step Q8 mesh + 4096 texture bake (~8 min).\n  The Trellis FRONT view is your original concept image; MV-Adapter only\n  fills in back/left/right (enhanced before use).\n  Output: output/3D/13_ASSET_FACTORY_*.glb (200k faces, Xatlas UVs, 4096\n  texture) + ASSET_VIEWS_HQ_* (the enhanced view sheet).\n\nIn Blender: File > Import > glTF. Views = your modeling/paintover reference.\nQuality knobs: detail-pass denoise (0.25-0.35), Trellis steps, target faces,\ntexture_size. Speed fallback: GGUF Q4_K_M + 12 steps + 2048 texture."
       ],
       "color": "#432",
       "bgcolor": "#432"
@@ -1938,30 +2346,150 @@
     ],
     [
       28,
-      27,
+      70,
       0,
-      40,
+      71,
       0,
-      "IMAGE"
+      "UPSCALE_MODEL"
     ],
     [
       29,
-      40,
+      27,
       0,
-      50,
-      0,
+      71,
+      1,
       "IMAGE"
     ],
     [
       30,
-      27,
+      71,
+      0,
+      72,
+      0,
+      "IMAGE"
+    ],
+    [
+      31,
+      72,
+      0,
+      73,
+      0,
+      "IMAGE"
+    ],
+    [
+      32,
+      3,
+      0,
+      73,
+      1,
+      "VAE"
+    ],
+    [
+      33,
+      1,
+      0,
+      77,
+      0,
+      "MODEL"
+    ],
+    [
+      34,
+      5,
+      0,
+      77,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      35,
+      74,
+      0,
+      78,
+      0,
+      "NOISE"
+    ],
+    [
+      36,
+      77,
+      0,
+      78,
+      1,
+      "GUIDER"
+    ],
+    [
+      37,
+      8,
+      0,
+      78,
+      2,
+      "SAMPLER"
+    ],
+    [
+      38,
+      75,
+      0,
+      76,
+      0,
+      "SIGMAS"
+    ],
+    [
+      39,
+      76,
+      1,
+      78,
+      3,
+      "SIGMAS"
+    ],
+    [
+      40,
+      73,
+      0,
+      78,
+      4,
+      "LATENT"
+    ],
+    [
+      41,
+      78,
+      0,
+      79,
+      0,
+      "LATENT"
+    ],
+    [
+      42,
+      3,
+      0,
+      79,
+      1,
+      "VAE"
+    ],
+    [
+      43,
+      79,
+      0,
+      80,
+      0,
+      "IMAGE"
+    ],
+    [
+      44,
+      12,
+      0,
+      45,
+      0,
+      "IMAGE"
+    ],
+    [
+      45,
+      79,
       0,
       41,
       0,
       "IMAGE"
     ],
     [
-      31,
+      46,
       41,
       0,
       51,
@@ -1969,15 +2497,15 @@
       "IMAGE"
     ],
     [
-      32,
-      27,
+      47,
+      79,
       0,
       42,
       0,
       "IMAGE"
     ],
     [
-      33,
+      48,
       42,
       0,
       52,
@@ -1985,15 +2513,15 @@
       "IMAGE"
     ],
     [
-      34,
-      27,
+      49,
+      79,
       0,
       43,
       0,
       "IMAGE"
     ],
     [
-      35,
+      50,
       43,
       0,
       53,
@@ -2001,7 +2529,7 @@
       "IMAGE"
     ],
     [
-      36,
+      51,
       48,
       0,
       49,
@@ -2009,15 +2537,15 @@
       "TRELLIS2PIPELINE"
     ],
     [
-      37,
-      50,
+      52,
+      45,
       0,
       49,
       1,
       "IMAGE"
     ],
     [
-      38,
+      53,
       52,
       0,
       49,
@@ -2025,7 +2553,7 @@
       "IMAGE"
     ],
     [
-      39,
+      54,
       53,
       0,
       49,
@@ -2033,7 +2561,7 @@
       "IMAGE"
     ],
     [
-      40,
+      55,
       51,
       0,
       49,
@@ -2041,7 +2569,7 @@
       "IMAGE"
     ],
     [
-      41,
+      56,
       49,
       0,
       60,
@@ -2049,7 +2577,7 @@
       "MESHWITHVOXEL"
     ],
     [
-      42,
+      57,
       49,
       1,
       60,
@@ -2057,7 +2585,7 @@
       "BVH"
     ],
     [
-      43,
+      58,
       60,
       0,
       61,
@@ -2065,7 +2593,7 @@
       "TRIMESH"
     ],
     [
-      44,
+      59,
       61,
       0,
       62,
@@ -2073,7 +2601,7 @@
       "STRING"
     ],
     [
-      45,
+      60,
       60,
       1,
       63,
@@ -2118,6 +2646,19 @@
         1000
       ],
       "color": "#3f9b46",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 5,
+      "title": "2b. VIEW ENHANCE \u2014 Flux2 detail pass (Ctrl+B with group 2)",
+      "bounding": [
+        1610,
+        1040,
+        1450,
+        860
+      ],
+      "color": "#6b9b3f",
       "font_size": 24,
       "flags": {}
     },
