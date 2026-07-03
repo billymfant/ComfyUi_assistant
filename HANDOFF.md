@@ -2,6 +2,16 @@
 
 _Last updated: 2026-07-03. Read `CLAUDE.md` for technical reference, `docs/COMFYUI_MASTERPLAN.md` for the motion-arsenal plan, `3dmodeling assistant plan.md` + `docs/superpowers/specs/2026-07-03-asset-factory-design.md` for the 3D-assistant line of work. This file is the "where we are / what's next" summary._
 
+## NEXT SESSION (written 2026-07-03, context ran out at 98%)
+**State: everything works.** Asset Factory (wf 12+13) shipped, live-tested, committed & pushed (`ab45587`). Both Trellis2-GGUF local patches applied + verified (see LOCAL PATCHES below); server was left running the fixed code. User's mask run diagnosed: bad results came from the concept image (lying flat, dead-front) — concept-image rules are in README/memory (`asset-factory.md`).
+
+**Agreed next task — "Ask Claude" custom node (user said "we talk about it", NOT yet approved to build):**
+- Plan: `custom_nodes/comfyui_claude` pack with an **Ask Claude** node → runs Claude Code headless (`claude -p`, cwd=F:\APPS\COMFYUI_HELPER so it has project context/memory) → STRING output. Modes: `chat` (Q&A) and `prompt` (rough idea → polished Flux2/asset prompt for CLIPTextEncode). Optional `--resume <session-id>` for multi-turn. Costs nothing (subscription).
+- Open decision for user: add a 2nd backend using the Anthropic API (`anthropic` SDK, model `claude-opus-4-8`, needs paid API key) for fast in-graph vision loops (image critique → prompt rewrite). User hadn't answered yet.
+- Ask the user "build it?" then implement. After that: phase-2 `make_asset.py`, then revisit parked ideas B (Blender addon) + D (char pipeline) — see memory `parked-ideas-blender.md`.
+
+Loose ends: `workflows/09_LTX2_i2v_glitch.json` duplicated at root and in `Video/` (structurally identical — ask which to keep); `.server_log.txt` untracked (gitignore?).
+
 ## NEWEST: Asset Factory (2026-07-03) — direction chosen + shipped
 Brainstormed ComfyUI+Blender direction with the user. **Chosen: ComfyUI = asset BUILDER** (characters/props/set pieces at "clean-up-friendly" tier: ~200k faces, holes filled, Xatlas UVs, 2048 baked PBR); the user assembles/animates by hand in Blender. Parked in memory for later: AI finishing pass on Blender renders (A), Blender addon bridge (B), rigged character pipeline (D) — see `parked-ideas-blender.md` memory; user wants B/D revisited after this ships.
 
